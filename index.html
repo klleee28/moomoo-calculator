@@ -1570,6 +1570,39 @@
           width: 100%;
         }
       }
+      .entry-reason-group {
+        margin-top: 20px;
+      }
+      .entry-reason-group .chip-btn {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+      .journal-table td.entry-reason {
+        white-space: normal;
+        min-width: 155px;
+        max-width: 250px;
+        overflow-wrap: anywhere;
+      }
+      .journal-table td.entry-reason:empty:after {
+        content: "—";
+      }
+      .journal-stats small {
+        display: block;
+        font-size: 10px;
+        margin-top: 6px;
+      }
+      .quantity-note {
+        margin-top: 8px;
+      }
+      @media (max-width: 700px) {
+        .journal-table td.entry-reason {
+          grid-column: 1/-1;
+          max-width: none;
+        }
+        .entry-reason-group .chips-row {
+          gap: 8px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1954,6 +1987,24 @@
                     </p>
                   </div>
                   <div
+                    class="form-group"
+                    id="autoSharePrecisionGroup"
+                    style="margin-top: 16px"
+                  >
+                    <label for="autoSharePrecision">Auto size in</label
+                    ><select id="autoSharePrecision" class="text-input">
+                      <option value="1">Whole shares</option>
+                      <option value="0.0001">
+                        Fractional shares · 4 decimal places
+                      </option>
+                    </select>
+                  </div>
+                  <p class="panel-note quantity-note">
+                    Fractional quantities support up to 4 decimal places. Fee
+                    estimates use the existing schedule; fractional-order fees
+                    may differ.
+                  </p>
+                  <div
                     id="manualSharesGroup"
                     style="display: none; margin-top: 16px"
                   >
@@ -1964,8 +2015,8 @@
                           id="customSharesInput"
                           type="number"
                           value="2"
-                          min="1"
-                          step="1"
+                          min="0.0001"
+                          step="0.0001"
                           class="text-input"
                           required
                         />
@@ -2354,7 +2405,9 @@
                   <span>Saved trades</span><strong id="journalCount">0</strong>
                 </div>
                 <div class="panel-card">
-                  <span>Closed net P&L</span><strong id="journalNet">—</strong>
+                  <span id="journalNetLabel">Closed net P&L</span
+                  ><strong id="journalNet">—</strong
+                  ><small id="journalFeeStatus" class="helper"></small>
                 </div>
                 <div class="panel-card">
                   <span>Win rate · closed trades</span
@@ -2369,7 +2422,7 @@
                       class="text-input"
                       id="journalSearch"
                       type="search"
-                      placeholder="Search ticker or notes"
+                      placeholder="Search ticker, reason or notes"
                     />
                   </div>
                   <div>
@@ -2406,6 +2459,7 @@
                       <tr>
                         <th>Date / time</th>
                         <th>Trade</th>
+                        <th>Why entered</th>
                         <th>Status</th>
                         <th>Shares</th>
                         <th>Entry</th>
@@ -2681,9 +2735,9 @@
                 type="number"
                 class="text-input"
                 id="recordShares"
-                min="1"
+                min="0.0001"
                 max="1000000000"
-                step="1"
+                step="0.0001"
                 required
               />
             </div>
@@ -2701,6 +2755,25 @@
               />
             </div>
           </div>
+          <fieldset class="entry-reason-group">
+            <legend>Why did you enter?</legend>
+            <p class="helper">Choose any that apply, or add your own reason.</p>
+            <div
+              id="entryReasonButtons"
+              class="chips-row"
+              role="group"
+              aria-label="Common entry reasons"
+            ></div>
+            <label for="recordCustomReason" style="margin-top: 14px"
+              >Custom entry reason <span class="muted">(optional)</span></label
+            ><input
+              type="text"
+              id="recordCustomReason"
+              class="text-input"
+              maxlength="240"
+              placeholder="e.g. Retest of yesterday's high with strong volume"
+            />
+          </fieldset>
           <fieldset id="recordExitFields" hidden disabled>
             <legend>Closing execution</legend>
             <div class="two-col-grid">
@@ -2728,7 +2801,7 @@
             </div>
             <div class="form-group">
               <label for="recordFees"
-                >Actual total fees for entry + exit (USD)</label
+                >Actual total fees for entry + exit (USD, optional)</label
               ><input
                 type="number"
                 id="recordFees"
@@ -2736,20 +2809,26 @@
                 min="0"
                 max="1000000000"
                 step="any"
-                required
               />
               <p class="panel-note">
-                Enter fees from your broker statement, including both sides. Use
-                0 only for a fee-free trade.
+                Leave blank to use estimated fees from the saved broker
+                settings. Enter 0 only for a fee-free trade.
               </p>
             </div>
             <div class="inline-info">
-              <span>Net P&L from these fills</span
+              <span id="recordNetLabel">Net P&L from these fills</span
               ><strong id="recordNet" class="num">—</strong>
             </div>
+            <p
+              id="recordFeeEstimate"
+              class="helper"
+              style="margin-top: 8px"
+              aria-live="polite"
+            ></p>
           </fieldset>
+
           <label for="recordNotes" class="notes-label"
-            >Trade thesis & lessons</label
+            >Trade notes & lessons</label
           ><textarea
             id="recordNotes"
             maxlength="10000"
@@ -2911,7 +2990,7 @@
 
         /**
          * Calculates exact fee breakdown for a single leg of a trade.
-         * @param {number} shares Number of whole shares
+         * @param {number} shares Number of shares, including fractional quantities
          * @param {number} price Price per share
          * @param {'buy'|'sell'} leg Trade leg
          * @param {number} usdMyr USD to MYR exchange rate
@@ -3080,7 +3159,7 @@
         }
 
         /**
-         * Sizing engine: Computes optimal whole share size so that:
+         * Sizing engine: Computes optimal whole or fractional share size so that:
          * Net Loss if Stopped = (Shares * |Entry - Stop|) + Total Fees <= Account Risk Budget.
          * @param {number} balance
          * @param {number} riskPct
@@ -3124,10 +3203,15 @@
             };
           }
 
-          const naiveShares = Math.min(
-            1000000000,
-            Math.floor(riskBudget / stopDistance),
+          const shareScale =
+            document.getElementById("autoSharePrecision").value === "0.0001"
+              ? 10000
+              : 1;
+          const naiveUnits = Math.min(
+            1000000000 * shareScale,
+            Math.floor((riskBudget / stopDistance) * shareScale),
           );
+          const naiveShares = naiveUnits / shareScale;
 
           if (naiveShares <= 0) {
             return {
@@ -3146,15 +3230,15 @@
             };
           }
 
-          // Monotonic binary search over integers [1, naiveShares]
+          // Search integer share units to avoid fractional rounding beyond the risk budget.
           let low = 1;
-          let high = naiveShares;
+          let high = naiveUnits;
           let bestShares = 0;
 
           while (low <= high) {
             const mid = Math.floor((low + high) / 2);
             const outcome = calculateStopLossOutcome(
-              mid,
+              mid / shareScale,
               entryPrice,
               stopPrice,
               isShort,
@@ -3164,7 +3248,7 @@
 
             // Epsilon tolerance for floating point comparison
             if (outcome.netLoss <= riskBudget + 1e-7) {
-              bestShares = mid;
+              bestShares = mid / shareScale;
               low = mid + 1; // Try to size higher
             } else {
               high = mid - 1; // Sizing causes net loss to exceed budget
@@ -3636,7 +3720,7 @@
               </div>
               <div class="alert-content">
                 <div class="alert-title">Position Sizing Blocked (0 Shares)</div>
-                <div class="alert-desc">Your risk budget of <b>$${data.riskBudget.toFixed(2)}</b> cannot cover one share plus estimated fees. Review your inputs before continuing.</div>
+                <div class="alert-desc">Your risk budget of <b>$${data.riskBudget.toFixed(2)}</b> cannot cover the minimum share increment plus estimated fees. Review your inputs before continuing.</div>
               </div>
             </div>
           `);
@@ -3683,17 +3767,22 @@
                 state.isPromo,
               ).total -
               data.balance;
+            const cashScale =
+              document.getElementById("autoSharePrecision").value ===
+                "0.0001" || !Number.isInteger(data.effectiveShares)
+                ? 10000
+                : 1;
             let cashLow = 0;
             let cashHigh = Math.min(
-              1000000000,
-              Math.floor(data.balance / data.entry),
+              1000000000 * cashScale,
+              Math.floor((data.balance / data.entry) * cashScale),
             );
             while (cashLow < cashHigh) {
               const candidate = Math.ceil((cashLow + cashHigh) / 2);
               const cost =
-                candidate * data.entry +
+                (candidate / cashScale) * data.entry +
                 calculateSingleLegFees(
-                  candidate,
+                  candidate / cashScale,
                   data.entry,
                   data.isShort ? "sell" : "buy",
                   state.usdMyr,
@@ -3702,7 +3791,7 @@
               if (cost <= data.balance) cashLow = candidate;
               else cashHigh = candidate - 1;
             }
-            const maxCashShares = cashLow;
+            const maxCashShares = cashLow / cashScale;
             banners.push(`
             <div class="alert-banner capital">
               <div class="alert-icon-box">
@@ -3733,7 +3822,7 @@
           const clampBtn = document.getElementById("btnClampCash");
           if (clampBtn) {
             clampBtn.addEventListener("click", function () {
-              const sh = parseInt(clampBtn.getAttribute("data-clamp"), 10);
+              const sh = Number(clampBtn.getAttribute("data-clamp"));
               if (sh > 0) {
                 setCustomShareOverride(sh);
               }
@@ -4213,6 +4302,9 @@
           input.addEventListener("input", recalculate);
         });
 
+        document
+          .getElementById("autoSharePrecision")
+          .addEventListener("change", recalculate);
         // Range sliders sync
         el.riskSlider.addEventListener("input", function () {
           el.riskPercentage.value = parseFloat(el.riskSlider.value).toFixed(1);
@@ -4396,6 +4488,7 @@
           el.entryPrice.value = "150.00";
           el.stopPrice.value = "147.00";
           el.customSharesInput.value = "2";
+          document.getElementById("autoSharePrecision").value = "1";
           document.getElementById("tradeNotes").value = "";
           setDirection(false);
           state.isManualSizing = false;
@@ -4430,6 +4523,7 @@
           "entryPrice",
           "stopPrice",
           "customSharesInput",
+          "autoSharePrecision",
           "tradeNotes",
         ];
         const views = {
@@ -4491,6 +4585,8 @@
           }
         }
         function syncControls() {
+          document.getElementById("autoSharePrecisionGroup").hidden =
+            state.isManualSizing;
           [
             [el.btnDirLong, !state.isShort],
             [el.btnDirShort, state.isShort],
@@ -4684,12 +4780,36 @@
             currency: "USD",
           }).format(value);
         const price = (value) => "$" + value.toFixed(value < 1 ? 4 : 2);
+        const entryReasonOptions = [
+          "Breakout",
+          "Pullback",
+          "Support bounce",
+          "Resistance rejection",
+          "Trend continuation",
+          "Reversal",
+          "Volume spike",
+          "News catalyst",
+        ];
+        const entryReasonText = (record) =>
+          [...(record.entryReasons || []), record.customEntryReason || ""]
+            .filter(Boolean)
+            .join(" · ");
+        const feesForRecord = (record) =>
+          record.fees ??
+          calculateRoundTripFees(
+            record.shares,
+            record.entry,
+            record.exit,
+            record.plan.direction === "short",
+            record.plan.usdMyr,
+            record.plan.isPromo,
+          ).total;
         const netResult = (record) =>
           (record.plan.direction === "short"
             ? record.entry - record.exit
             : record.exit - record.entry) *
             record.shares -
-          record.fees;
+          feesForRecord(record);
         function localDateTime(iso = new Date().toISOString()) {
           const date = new Date(iso);
           return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
@@ -4720,6 +4840,20 @@
             /^\d{4}-\d{2}-\d{2}T/.test(v) &&
             Number.isFinite(Date.parse(v));
           const p = raw?.plan;
+          const entryReasons = raw?.entryReasons ?? [],
+            customEntryReason = raw?.customEntryReason ?? "";
+          if (
+            !Array.isArray(entryReasons) ||
+            entryReasons.length > entryReasonOptions.length ||
+            !entryReasons.every((reason) =>
+              entryReasonOptions.includes(reason),
+            ) ||
+            typeof customEntryReason !== "string" ||
+            customEntryReason.length > 240
+          )
+            throw new Error(
+              "This file contains an invalid entry reason. Nothing was imported.",
+            );
           if (
             !raw ||
             !p ||
@@ -4729,16 +4863,16 @@
             !date(raw.createdAt) ||
             !date(raw.entryAt) ||
             !["planned", "open", "closed"].includes(raw.status) ||
-            !finite(raw.shares, 1) ||
-            !Number.isInteger(raw.shares) ||
+            !finite(raw.shares, 0.0001) ||
+            Number(raw.shares.toFixed(4)) !== raw.shares ||
             !finite(raw.entry, 0.0001) ||
             typeof raw.notes !== "string" ||
             raw.notes.length > 10000 ||
             typeof p.ticker !== "string" ||
             !/^[A-Z0-9.\-]{1,12}$/.test(p.ticker) ||
             !["long", "short"].includes(p.direction) ||
-            !finite(p.shares, 1) ||
-            !Number.isInteger(p.shares) ||
+            !finite(p.shares, 0.0001) ||
+            Number(p.shares.toFixed(4)) !== p.shares ||
             !finite(p.entry, 0.0001) ||
             !finite(p.stop, 0.0001) ||
             !finite(p.target, 0.0001, 1e12) ||
@@ -4756,12 +4890,12 @@
           if (
             raw.status === "closed" &&
             (!finite(raw.exit, 0.0001) ||
-              !finite(raw.fees) ||
+              (raw.fees != null && !finite(raw.fees)) ||
               !date(raw.closedAt) ||
               Date.parse(raw.closedAt) < Date.parse(raw.entryAt))
           )
             throw new Error(
-              "Closed trades need valid exit details, fees, and an exit time after entry.",
+              "Closed trades need valid exit details, nonnegative fees when provided, and an exit time after entry.",
             );
           return {
             id: raw.id,
@@ -4771,9 +4905,11 @@
             shares: raw.shares,
             entry: raw.entry,
             exit: raw.status === "closed" ? raw.exit : null,
-            fees: raw.status === "closed" ? raw.fees : null,
+            fees: raw.status === "closed" ? (raw.fees ?? null) : null,
             closedAt: raw.status === "closed" ? raw.closedAt : null,
             notes: raw.notes,
+            entryReasons: [...new Set(entryReasons)],
+            customEntryReason: customEntryReason.trim(),
             plan: Object.fromEntries(
               [
                 "ticker",
@@ -4806,6 +4942,15 @@
           );
           j("journalNet").textContent = closed.length ? money(total) : "—";
           j("journalNet").className = total < 0 ? "loss-text" : "profit-text";
+          const estimatedCount = closed.filter(
+            (record) => record.fees === null,
+          ).length;
+          j("journalNetLabel").textContent = estimatedCount
+            ? "Closed net P&L · estimated"
+            : "Closed net P&L";
+          j("journalFeeStatus").textContent = estimatedCount
+            ? `${estimatedCount} trade${estimatedCount === 1 ? "" : "s"} use estimated fees; win rate is provisional.`
+            : "";
           j("journalWinRate").textContent = closed.length
             ? Math.round(
                 (closed.filter((record) => netResult(record) > 0).length /
@@ -4819,7 +4964,13 @@
             .filter(
               (record) =>
                 (status === "all" || record.status === status) &&
-                (record.plan.ticker + " " + record.notes)
+                (
+                  record.plan.ticker +
+                  " " +
+                  entryReasonText(record) +
+                  " " +
+                  record.notes
+                )
                   .toLowerCase()
                   .includes(query),
             )
@@ -4833,6 +4984,7 @@
                 timeStyle: "short",
               }),
               record.plan.ticker + " · " + record.plan.direction.toUpperCase(),
+              entryReasonText(record) || "—",
               record.status[0].toUpperCase() + record.status.slice(1),
               String(record.shares),
               price(record.entry),
@@ -4845,15 +4997,24 @@
               td.dataset.label = [
                 "Date / time",
                 "Trade",
+                "Why entered",
                 "Status",
                 "Shares",
                 "Entry",
                 "Exit",
                 "Net P&L",
               ][index];
-              if (index === 6 && record.status === "closed")
+              if (index === 2) td.className = "entry-reason";
+              if (index === 7 && record.status === "closed") {
                 td.className =
                   netResult(record) < 0 ? "loss-text" : "profit-text";
+                if (record.fees === null) {
+                  const note = document.createElement("small");
+                  note.textContent =
+                    "Estimated fees: " + money(feesForRecord(record));
+                  td.append(note);
+                }
+              }
               tr.append(td);
             });
             const td = document.createElement("td"),
@@ -4952,6 +5113,13 @@
           if (!user) {
             j("recoveryForm").hidden = true;
             j("recordNotes").value = "";
+            j("recordCustomReason").value = "";
+            j("entryReasonButtons")
+              .querySelectorAll("button")
+              .forEach((button) => {
+                button.setAttribute("aria-pressed", "false");
+                button.classList.remove("active");
+              });
             j("journalPlanSummary").textContent = "";
             j("recordError").textContent = "";
           }
@@ -5011,6 +5179,16 @@
             editingRecord.closedAt || new Date().toISOString(),
           );
           j("recordNotes").value = editingRecord.notes;
+          j("recordCustomReason").value = editingRecord.customEntryReason || "";
+          j("entryReasonButtons")
+            .querySelectorAll("button")
+            .forEach((button) => {
+              const selected = (editingRecord.entryReasons || []).includes(
+                button.dataset.reason,
+              );
+              button.classList.toggle("active", selected);
+              button.setAttribute("aria-pressed", String(selected));
+            });
           j("deleteRecord").hidden = !record;
           j("journalDeleteConfirm").hidden = true;
           recordMessage("");
@@ -5027,25 +5205,39 @@
           j("recordDateLabel").textContent =
             (planned ? "Planned entry" : "Entry") + " date / time";
           j("recordClosedAt").min = j("recordDate").value;
-          const ids = [
-            "recordEntry",
-            "recordShares",
-            "recordExit",
-            "recordFees",
-          ];
-          j("recordNet").textContent =
+          const valid =
             closed &&
-            ids.every((id) => j(id).value !== "" && j(id).checkValidity())
-              ? money(
-                  netResult({
-                    plan: editingRecord.plan,
-                    entry: Number(j("recordEntry").value),
-                    shares: Number(j("recordShares").value),
-                    exit: Number(j("recordExit").value),
-                    fees: Number(j("recordFees").value),
-                  }),
-                )
-              : "—";
+            ["recordEntry", "recordShares", "recordExit"].every(
+              (id) => j(id).value !== "" && j(id).checkValidity(),
+            ) &&
+            j("recordFees").checkValidity();
+          const estimated = j("recordFees").value === "";
+          const preview = valid
+            ? {
+                plan: editingRecord.plan,
+                entry: Number(j("recordEntry").value),
+                shares: Number(j("recordShares").value),
+                exit: Number(j("recordExit").value),
+                fees: estimated ? null : Number(j("recordFees").value),
+              }
+            : null;
+          j("recordNetLabel").textContent = estimated
+            ? "Estimated net P&L"
+            : "Net P&L from these fills";
+          j("recordNet").textContent = preview
+            ? money(netResult(preview))
+            : "—";
+          j("recordNet").style.color = preview
+            ? netResult(preview) < 0
+              ? "var(--color-loss)"
+              : "var(--color-profit)"
+            : "var(--text-muted)";
+          j("recordFeeEstimate").textContent =
+            preview && estimated
+              ? "Using " +
+                money(feesForRecord(preview)) +
+                " estimated total fees. Add actual fees later to finalize P&L."
+              : "";
         }
         async function writeRecord(record, deleting = false) {
           if (!journalUser)
@@ -5129,8 +5321,17 @@
               entry: Number(j("recordEntry").value),
               shares: Number(j("recordShares").value),
               notes: j("recordNotes").value,
+              entryReasons: [
+                ...j("entryReasonButtons").querySelectorAll(
+                  '[aria-pressed="true"]',
+                ),
+              ].map((button) => button.dataset.reason),
+              customEntryReason: j("recordCustomReason").value.trim(),
               exit: closed ? Number(j("recordExit").value) : null,
-              fees: closed ? Number(j("recordFees").value) : null,
+              fees:
+                closed && j("recordFees").value !== ""
+                  ? Number(j("recordFees").value)
+                  : null,
               closedAt: closed
                 ? new Date(j("recordClosedAt").value).toISOString()
                 : null,
@@ -5141,6 +5342,20 @@
           } finally {
             setJournalBusy(false);
           }
+        });
+        entryReasonOptions.forEach((reason) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip-btn";
+          button.textContent = reason;
+          button.dataset.reason = reason;
+          button.setAttribute("aria-pressed", "false");
+          button.addEventListener("click", () => {
+            const selected = button.getAttribute("aria-pressed") !== "true";
+            button.setAttribute("aria-pressed", String(selected));
+            button.classList.toggle("active", selected);
+          });
+          j("entryReasonButtons").append(button);
         });
         j("journalForm").addEventListener("input", updateRecordFields);
         j("recordStatus").addEventListener("change", updateRecordFields);

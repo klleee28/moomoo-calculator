@@ -249,13 +249,11 @@ test("backup exports, duplicate-safe imports, filtering and notes render as text
   const backup = JSON.parse(fs.readFileSync(await download.path(), "utf8"));
   assert.equal(backup.records.length, 1);
   assert.equal(backup.records[0]._version, undefined);
-  await page
-    .locator("#journalFile")
-    .setInputFiles({
-      name: "backup.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.locator("#journalFile").setInputFiles({
+    name: "backup.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await page.waitForFunction(() =>
     document
       .getElementById("journalNotice")
@@ -271,17 +269,165 @@ test("backup exports, duplicate-safe imports, filtering and notes render as text
   assert.equal(await page.locator("#journalDialog img").count(), 0);
   await page.locator("#cancelRecord").click();
   backup.records[0].shares = -1;
-  await page
-    .locator("#journalFile")
-    .setInputFiles({
-      name: "bad.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(backup)),
-    });
+  await page.locator("#journalFile").setInputFiles({
+    name: "bad.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
   await page.waitForFunction(() =>
     document
       .getElementById("journalNotice")
       .textContent.includes("invalid trade record"),
   );
   assert.equal(data.rows.size, 1);
+});
+
+test("entry reasons and fractional trades persist; blank fees stay estimated and zero is actual", async (t) => {
+  const { page, data } = await setup(t);
+  await signIn(page);
+  await page.locator('.nav-btn[data-view="plan"]').click();
+  await page.locator("#btnModeManual").click();
+  await page.locator("#customSharesInput").fill("0.25");
+  await newRecord(page, "closed");
+  assert.equal(await page.locator("#recordShares").inputValue(), "0.25");
+  await page.locator('[data-reason="Breakout"]').click();
+  await page.locator('[data-reason="Volume spike"]').click();
+  await page.locator('[data-reason="Reversal"]').click();
+  await page.locator('[data-reason="Reversal"]').click();
+  await page.locator("#recordCustomReason").fill("Retest of premarket high");
+  await page.locator("#recordNotes").fill("Waited for confirmation.");
+  await page.locator("#recordExit").fill("160");
+  assert.equal(await page.locator("#recordFees").inputValue(), "");
+  assert.equal(
+    await page.locator("#recordNetLabel").innerText(),
+    "Estimated net P&L",
+  );
+  assert.equal(await page.locator("#recordNet").innerText(), "$0.04");
+  assert.equal(data.rows.size, 0);
+  await page.screenshot({
+    path: "test-results/journal-reasons-editor.png",
+    fullPage: true,
+  });
+  await save(page);
+  const record = [...data.rows.values()][0].record;
+  assert.deepEqual(record.entryReasons, ["Breakout", "Volume spike"]);
+  assert.equal(record.customEntryReason, "Retest of premarket high");
+  assert.equal(record.fees, null);
+  assert.equal(record.shares, 0.25);
+  assert.equal(record.plan.shares, 0.25);
+  assert.match(
+    await page.locator("#journalRows").innerText(),
+    /Breakout.*Volume spike.*Retest/,
+  );
+  assert.match(await page.locator("#journalNetLabel").innerText(), /estimated/);
+  assert.match(
+    await page.locator("#journalRows").innerText(),
+    /Estimated fees/,
+  );
+  await page.locator("#journalSearch").fill("premarket");
+  assert.equal(await page.locator("#journalRows tr").count(), 1);
+  await page.reload();
+  await page.waitForFunction(
+    () => document.querySelectorAll("#journalRows tr").length === 1,
+  );
+  await page.screenshot({
+    path: "test-results/journal-reasons-desktop.png",
+    fullPage: true,
+  });
+  await page.locator("#journalRows button").click();
+  assert.equal(
+    await page.locator('[data-reason="Breakout"]').getAttribute("aria-pressed"),
+    "true",
+  );
+  assert.equal(
+    await page.locator('[data-reason="Reversal"]').getAttribute("aria-pressed"),
+    "false",
+  );
+  assert.equal(
+    await page.locator("#recordCustomReason").inputValue(),
+    "Retest of premarket high",
+  );
+  assert.equal(await page.locator("#recordFees").inputValue(), "");
+  await page.locator("#recordFees").fill("-1");
+  await page.locator("#submitRecord").click();
+  assert.equal(await page.locator("#journalDialog").isVisible(), true);
+  await page.locator("#recordFees").fill("0");
+  assert.equal(await page.locator("#recordNet").innerText(), "$2.50");
+  await save(page);
+  assert.equal([...data.rows.values()][0].record.fees, 0);
+  assert.equal(
+    await page.locator("#journalNetLabel").innerText(),
+    "Closed net P&L",
+  );
+  assert.equal(await page.locator("#journalNet").innerText(), "$2.50");
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#exportJournal").click();
+  const backup = JSON.parse(
+    fs.readFileSync(await (await downloadPromise).path(), "utf8"),
+  );
+  assert.deepEqual(backup.records[0].entryReasons, [
+    "Breakout",
+    "Volume spike",
+  ]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+    true,
+  );
+  await page.screenshot({
+    path: "test-results/journal-reasons-mobile.png",
+    fullPage: true,
+  });
+});
+
+test("legacy records load and new fractional reasons survive JSON import", async (t) => {
+  const { page, data } = await setup(t);
+  await signIn(page);
+  await newRecord(page);
+  await save(page);
+  const legacy = [...data.rows.values()][0].record;
+  delete legacy.entryReasons;
+  delete legacy.customEntryReason;
+  await page.reload();
+  await page.waitForFunction(
+    () => document.querySelectorAll("#journalRows tr").length === 1,
+  );
+  assert.equal(
+    await page.locator("#journalRows .entry-reason").innerText(),
+    "—",
+  );
+  const imported = {
+    ...legacy,
+    id: "33333333-3333-4333-8333-333333333333",
+    shares: 0.125,
+    status: "closed",
+    exit: 140,
+    fees: null,
+    closedAt: legacy.entryAt,
+    entryReasons: ["Pullback"],
+    customEntryReason: '<img src=x onerror="alert(1)">',
+    plan: { ...legacy.plan, shares: 0.125, direction: "short" },
+  };
+  await page
+    .locator("#journalFile")
+    .setInputFiles({
+      name: "new.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(
+        JSON.stringify({
+          format: "tradecraft-journal",
+          version: 1,
+          records: [imported],
+        }),
+      ),
+    });
+  await page.waitForFunction(
+    () => document.querySelectorAll("#journalRows tr").length === 2,
+  );
+  assert.equal(data.rows.size, 2);
+  assert.equal(await page.locator("#journalRows img").count(), 0);
+  assert.match(await page.locator("#journalRows").innerText(), /Pullback/);
+  assert.equal(await page.locator("#journalNet").innerText(), "-$1.21");
 });

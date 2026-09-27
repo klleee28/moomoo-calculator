@@ -148,6 +148,9 @@ test("custom risk warning, fee-inclusive cash clamp and auto size", async (t) =>
     "true",
   );
   await page.locator("#customSharesInput").fill("2.5");
+  assert.equal(await amount(page, "metricShares"), 2.5);
+  assert.equal(await page.locator("#btnCopyOrder").isDisabled(), false);
+  await page.locator("#customSharesInput").fill("2.12345");
   assert.equal(await page.locator("#btnCopyOrder").isDisabled(), true);
   await page.locator("#btnModeAuto").click();
   assert.equal(await amount(page, "metricShares"), 2);
@@ -274,4 +277,46 @@ test("cash clamp reserves entry fees at an exact position-value boundary", async
   await page.locator("#btnClampCash").click();
   assert.equal(await page.locator("#customSharesInput").inputValue(), "1");
   assert.equal(await page.locator("#btnClampCash").count(), 0);
+});
+
+test("fractional automatic sizing, cash limits and preferences preserve precision", async (t) => {
+  const page = await pageFor(t);
+  await page.locator("#autoSharePrecision").selectOption("0.0001");
+  const shares = await amount(page, "metricShares");
+  assert.ok(shares > 2 && shares < 3);
+  assert.equal(Number(shares.toFixed(4)), shares);
+  const feeLeg = (q, p, sell = false) =>
+    0.99 +
+    Math.min(1000, Math.ceil((q * p * 4.4) / 1000)) / 4.4 +
+    Math.min(q * 0.003, q * p * 0.01) +
+    (sell
+      ? Math.max(0.01, q * p * 0.000008) +
+        Math.min(8.3, Math.max(0.01, q * 0.000166))
+      : 0);
+  const risk = (q) => q * 3 + feeLeg(q, 150) + feeLeg(q, 147, true);
+  assert.ok(risk(shares) <= 10 + 1e-7);
+  assert.ok(risk(Number((shares + 0.0001).toFixed(4))) > 10);
+  await page.reload();
+  assert.equal(
+    await page.locator("#autoSharePrecision").inputValue(),
+    "0.0001",
+  );
+  assert.equal(await amount(page, "metricShares"), shares);
+  await page.locator("#accountBalance").fill("100");
+  await page.locator("#btnModeManual").click();
+  await page.locator("#customSharesInput").fill("1.5");
+  await page.locator("#btnClampCash").click();
+  const clamped = Number(await page.locator("#customSharesInput").inputValue());
+  assert.ok(clamped > 0 && clamped < 1);
+  assert.ok(clamped * 150 + feeLeg(clamped, 150) <= 100);
+  assert.equal(await page.locator("#btnClampCash").count(), 0);
+  await view(page, "review");
+  await page.locator("#btnCopyOrder").click();
+  assert.ok(
+    (await page.evaluate(() => navigator.clipboard.readText())).includes(
+      clamped + " shares",
+    ),
+  );
+  await page.locator("#btnResetDefaults").click();
+  assert.equal(await page.locator("#autoSharePrecision").inputValue(), "1");
 });
