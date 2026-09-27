@@ -4,10 +4,17 @@
   "private": true,
   "description": "An offline, fee-aware trading planner for Moomoo MY US equities",
   "scripts": {
-    "test": "node --test tests/calculator.test.cjs"
+    "test": "npm run build && node --test tests/*.test.cjs",
+    "build": "node scripts/build.cjs",
+    "preview": "node scripts/preview.cjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "esbuild": "^0.28.2",
     "playwright": "^1.58.0",
     "prettier": "^3.9.9"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2"
   }
 }

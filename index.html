@@ -1334,6 +1334,242 @@
         height: 18px;
         display: block;
       }
+      .workspace.journal-mode {
+        grid-template-columns: 1fr;
+      }
+      .journal-mode > .summary {
+        display: none;
+      }
+      .journal-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+      .journal-toolbar .view-intro {
+        margin: 0;
+      }
+      .journal-storage {
+        margin-bottom: 20px;
+      }
+      .journal-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .journal-stats .panel-card {
+        padding: 22px;
+      }
+      .journal-stats span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+      .journal-stats strong {
+        display: block;
+        font: 600 28px var(--font-mono);
+        margin-top: 10px;
+      }
+      .journal-filters {
+        justify-content: flex-start;
+      }
+      .journal-filters > div:first-child {
+        flex: 1;
+      }
+      .journal-filters > div:last-child {
+        width: 180px;
+      }
+      .journal-empty {
+        text-align: center;
+        padding: 60px 20px;
+      }
+      .journal-empty h2 {
+        margin: 20px 0 8px;
+      }
+      .journal-empty .btn {
+        margin-top: 24px;
+      }
+      .journal-table small {
+        display: block;
+        color: var(--text-muted);
+        font-size: 10px;
+      }
+      .journal-table td:nth-child(2) {
+        font-weight: 600;
+      }
+      .journal-notice {
+        background: #f7f5eb;
+        border: 1px solid #e6dfc2;
+        color: #7a6128;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 12px;
+        margin-bottom: 16px;
+      }
+      .journal-error {
+        color: var(--color-loss);
+        font-size: 12px;
+        margin-top: 12px;
+      }
+      .journal-dialog-footer {
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .journal-dialog-footer > .copy-actions {
+        margin-left: auto;
+      }
+      .btn.danger {
+        color: #a4434f;
+        border-color: #e3bec3;
+      }
+      dialog {
+        padding: 0;
+        border: 1px solid var(--border-medium);
+        border-radius: 12px;
+        width: min(620px, calc(100% - 32px));
+        max-height: 90vh;
+        overflow: auto;
+        color: var(--text-main);
+        box-shadow: 0 20px 90px #20352933;
+      }
+      dialog::backdrop {
+        background: #1a2a3655;
+      }
+      dialog .panel-head {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+      }
+      dialog h2 {
+        margin-top: 5px;
+      }
+      dialog fieldset {
+        border: 1px solid #e1e9e4;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 0;
+      }
+      dialog legend {
+        padding: 0 6px;
+        font-size: 12px;
+        color: #4a7857;
+      }
+      select.text-input {
+        padding-right: 8px;
+      }
+      .journal-save-row {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .journal-save-row .btn {
+        white-space: nowrap;
+      }
+      @media (max-width: 700px) {
+        .journal-toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .journal-stats {
+          gap: 8px;
+        }
+        .journal-stats .panel-card {
+          padding: 14px 10px;
+        }
+        .journal-stats span {
+          font-size: 10px;
+        }
+        .journal-stats strong {
+          font-size: 20px;
+        }
+        .journal-filters > div:last-child {
+          width: 120px;
+        }
+        .journal-save-row {
+          flex-wrap: wrap;
+        }
+        .journal-dialog-footer {
+          padding: 16px;
+        }
+        .nav-text {
+          font-size: 8px;
+        }
+        .journal-table td {
+          padding-top: 18px;
+          padding-bottom: 18px;
+        }
+        dialog .two-col-grid {
+          grid-template-columns: 1fr;
+        }
+        dialog .form-group {
+          margin-bottom: 16px;
+        }
+        .journal-empty {
+          padding: 35px 16px;
+        }
+      }
+      .journal-filters > div {
+        min-width: 0;
+      }
+      .journal-toolbar {
+        overflow-wrap: anywhere;
+      }
+      .table-wrap {
+        position: relative;
+      }
+      .journal-toolbar .copy-actions > .btn {
+        flex: none;
+        white-space: nowrap;
+      }
+      @media (max-width: 700px) {
+        .journal-table thead {
+          display: none;
+        }
+        .journal-table,
+        .journal-table tbody {
+          display: block;
+          width: 100%;
+        }
+        .journal-table tr {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--border-subtle);
+        }
+        .journal-table td,
+        .journal-table td:first-child {
+          display: block;
+          text-align: left;
+          padding: 9px 16px;
+          border: 0;
+          white-space: normal;
+        }
+        .journal-table td:before {
+          content: attr(data-label);
+          display: block;
+          color: var(--text-muted);
+          font-size: 10px;
+          font-weight: 400;
+          margin-bottom: 4px;
+        }
+        .journal-table td:last-child {
+          grid-column: 1/-1;
+        }
+        .journal-table td:last-child:before {
+          display: none;
+        }
+        .journal-table td:last-child .btn {
+          width: 100%;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1395,6 +1631,19 @@
               <rect x="5" y="3" width="14" height="18" rx="2" />
               <path d="M9 8h6M9 12h6M9 16h4" /></svg></span
           ><span class="nav-text">Review & copy</span>
+        </button>
+        <button class="nav-btn" data-view="journal">
+          <span class="nav-num" aria-hidden="true"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                d="M4 3h13a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3zM4 17h16M8 7h8M8 11h6"
+              /></svg></span
+          ><span class="nav-text">Trade journal</span>
         </button>
         <hr class="nav-divider" />
         <button class="nav-btn" data-view="settings">
@@ -1944,6 +2193,14 @@
                       Copy journal entry
                     </button>
                   </div>
+                  <div class="journal-save-row">
+                    <button class="btn primary" id="btnSaveJournal" disabled>
+                      Save to journal</button
+                    ><span class="helper"
+                      >Keep a record of this plan, then add execution details as
+                      your trade progresses.</span
+                    >
+                  </div>
                   <label for="tradeNotes" class="notes-label"
                     >Trade thesis & notes
                     <span class="muted" style="font-weight: 400"
@@ -1965,6 +2222,216 @@
                 ><button class="btn" data-view="plan">Edit trade setup</button>
               </div>
             </section>
+            <section data-panel="journal" hidden aria-label="Trade journal">
+              <div class="journal-toolbar">
+                <p class="view-intro">
+                  A record of your decisions, executions, and lessons.
+                </p>
+                <div class="copy-actions">
+                  <button class="btn" id="exportJournal">Export backup</button
+                  ><button class="btn" id="importJournal">Import backup</button
+                  ><input
+                    type="file"
+                    id="journalFile"
+                    accept=".json,application/json"
+                    hidden
+                  />
+                </div>
+              </div>
+              <p class="journal-storage helper">
+                Sign in to access your private journal across devices. Export a
+                backup whenever you want your own copy.
+              </p>
+              <div
+                id="journalNotice"
+                role="status"
+                class="journal-notice"
+                hidden
+              ></div>
+              <div class="panel-card" id="journalAuth">
+                <div class="panel-body">
+                  <h2>Your journal, wherever you trade.</h2>
+                  <p class="helper" style="margin: 8px 0 18px">
+                    Sign in to save your trades and pick up on another device.
+                  </p>
+                  <div class="journal-notice" id="journalSetup">
+                    Cloud sign-in is not configured for this deployment yet.
+                    Your calculator remains available.
+                  </div>
+                  <div id="journalSignIn" hidden>
+                    <button class="btn" id="googleSignIn">
+                      Continue with Google
+                    </button>
+                    <p class="helper" style="margin: 16px 0">
+                      Or use your email
+                    </p>
+                    <form id="authEmailForm">
+                      <div class="two-col-grid">
+                        <div class="form-group">
+                          <label for="authEmail">Email address</label
+                          ><input
+                            type="email"
+                            id="authEmail"
+                            class="text-input"
+                            autocomplete="email"
+                            required
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label for="authPassword">Password</label
+                          ><input
+                            type="password"
+                            id="authPassword"
+                            class="text-input"
+                            autocomplete="current-password"
+                            minlength="6"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div class="copy-actions">
+                        <button
+                          type="submit"
+                          class="btn primary"
+                          id="emailSignIn"
+                        >
+                          Sign in</button
+                        ><button type="button" class="btn" id="createAccount">
+                          Create account</button
+                        ><button
+                          type="button"
+                          class="btn text"
+                          id="resetPassword"
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                  <p
+                    id="authMessage"
+                    role="status"
+                    class="helper"
+                    style="margin-top: 14px"
+                  ></p>
+                </div>
+              </div>
+              <form id="recoveryForm" class="panel-card" hidden>
+                <div class="panel-body">
+                  <h2>Choose a new password</h2>
+                  <label for="newPassword" style="margin-top: 16px"
+                    >New password</label
+                  ><input
+                    type="password"
+                    class="text-input"
+                    id="newPassword"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                  /><button
+                    class="btn primary"
+                    id="updatePassword"
+                    type="submit"
+                    style="margin-top: 12px"
+                  >
+                    Update password
+                  </button>
+                  <p id="recoveryMessage" class="helper" role="status"></p>
+                </div>
+              </form>
+              <div id="journalAccount" class="journal-toolbar" hidden>
+                <span class="helper"
+                  >Signed in as <strong id="journalEmailDisplay"></strong> ·
+                  <span id="journalSyncStatus">Sign in to sync</span></span
+                >
+                <div class="copy-actions">
+                  <button class="btn" id="refreshJournal">Refresh</button
+                  ><button class="btn" id="signOutJournal">Sign out</button>
+                </div>
+              </div>
+              <div class="journal-stats">
+                <div class="panel-card">
+                  <span>Saved trades</span><strong id="journalCount">0</strong>
+                </div>
+                <div class="panel-card">
+                  <span>Closed net P&L</span><strong id="journalNet">—</strong>
+                </div>
+                <div class="panel-card">
+                  <span>Win rate · closed trades</span
+                  ><strong id="journalWinRate">—</strong>
+                </div>
+              </div>
+              <div class="panel-card">
+                <div class="panel-head journal-filters">
+                  <div>
+                    <label for="journalSearch">Find a trade</label
+                    ><input
+                      class="text-input"
+                      id="journalSearch"
+                      type="search"
+                      placeholder="Search ticker or notes"
+                    />
+                  </div>
+                  <div>
+                    <label for="journalFilter">Status</label
+                    ><select id="journalFilter" class="text-input">
+                      <option value="all">All trades</option>
+                      <option value="planned">Planned</option>
+                      <option value="open">Open</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="journalEmpty" class="journal-empty">
+                  <span class="section-number">YOUR TRADING STORY</span>
+                  <h2>Your first entry starts with a plan.</h2>
+                  <p class="helper">
+                    Set up a trade, then select “Save to journal” on the review
+                    screen.
+                  </p>
+                  <button class="btn primary" data-view="plan">
+                    Plan a trade →
+                  </button>
+                </div>
+                <div
+                  class="table-wrap"
+                  id="journalTableWrap"
+                  role="region"
+                  aria-label="Saved trades"
+                  tabindex="0"
+                  hidden
+                >
+                  <table class="ladder-table journal-table">
+                    <thead>
+                      <tr>
+                        <th>Date / time</th>
+                        <th>Trade</th>
+                        <th>Status</th>
+                        <th>Shares</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>Net P&L</th>
+                        <th><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody id="journalRows"></tbody>
+                  </table>
+                </div>
+                <p
+                  class="helper"
+                  id="journalMatches"
+                  style="padding: 12px 22px"
+                  hidden
+                ></p>
+              </div>
+              <p class="helper">
+                Totals cover all closed records, including trades hidden by
+                filters. No live pricing or unrealized P&L. Each record
+                represents a single entry and a full exit; use average fills for
+                multiple executions.
+              </p>
+            </section>
+
             <section data-panel="settings" hidden aria-label="Broker settings">
               <p class="view-intro">
                 Set these once for your account. They apply across every view.
@@ -2164,6 +2631,160 @@
     <div id="toastNotice" class="toast-notice" role="status">
       <span id="toastMessage"></span>
     </div>
+    <!-- CLOUD_BOOTSTRAP -->
+    <dialog id="journalDialog" aria-labelledby="journalDialogTitle">
+      <form id="journalForm">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">Trade journal</span>
+            <h2 id="journalDialogTitle">Record trade</h2>
+          </div>
+          <button
+            class="btn"
+            type="button"
+            id="closeJournalDialog"
+            aria-label="Close trade record"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="panel-body">
+          <p
+            id="journalPlanSummary"
+            class="helper"
+            style="margin-bottom: 20px"
+          ></p>
+          <div class="two-col-grid">
+            <div class="form-group">
+              <label for="recordStatus">Trade status</label
+              ><select id="recordStatus" class="text-input">
+                <option value="planned">Planned · not executed</option>
+                <option value="open">Open · entered</option>
+                <option value="closed">Closed · exited</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="recordDate" id="recordDateLabel"
+                >Planned entry date / time</label
+              ><input
+                type="datetime-local"
+                id="recordDate"
+                class="text-input"
+                required
+              />
+            </div>
+          </div>
+          <div class="two-col-grid">
+            <div class="form-group">
+              <label for="recordShares">Shares / executed quantity</label
+              ><input
+                type="number"
+                class="text-input"
+                id="recordShares"
+                min="1"
+                max="1000000000"
+                step="1"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="recordEntry" id="recordEntryLabel"
+                >Planned entry price (USD)</label
+              ><input
+                type="number"
+                class="text-input"
+                id="recordEntry"
+                min="0.0001"
+                max="1000000000"
+                step="any"
+                required
+              />
+            </div>
+          </div>
+          <fieldset id="recordExitFields" hidden disabled>
+            <legend>Closing execution</legend>
+            <div class="two-col-grid">
+              <div class="form-group">
+                <label for="recordExit">Actual average exit price (USD)</label
+                ><input
+                  type="number"
+                  id="recordExit"
+                  class="text-input"
+                  min="0.0001"
+                  max="1000000000"
+                  step="any"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="recordClosedAt">Exit date / time</label
+                ><input
+                  type="datetime-local"
+                  id="recordClosedAt"
+                  class="text-input"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="recordFees"
+                >Actual total fees for entry + exit (USD)</label
+              ><input
+                type="number"
+                id="recordFees"
+                class="text-input"
+                min="0"
+                max="1000000000"
+                step="any"
+                required
+              />
+              <p class="panel-note">
+                Enter fees from your broker statement, including both sides. Use
+                0 only for a fee-free trade.
+              </p>
+            </div>
+            <div class="inline-info">
+              <span>Net P&L from these fills</span
+              ><strong id="recordNet" class="num">—</strong>
+            </div>
+          </fieldset>
+          <label for="recordNotes" class="notes-label"
+            >Trade thesis & lessons</label
+          ><textarea
+            id="recordNotes"
+            maxlength="10000"
+            placeholder="Why did you take the trade? What would you repeat or change?"
+          ></textarea>
+          <p class="panel-note">
+            Original planned levels and broker assumptions remain saved with
+            this record. All dates use your local time zone.
+          </p>
+          <p id="recordError" role="alert" class="journal-error" hidden></p>
+          <div id="journalDeleteConfirm" class="journal-notice" hidden>
+            <p>Delete this trade record? This cannot be undone.</p>
+            <div class="copy-actions" style="margin-top: 10px">
+              <button type="button" class="btn danger" id="confirmDeleteRecord">
+                Delete record</button
+              ><button type="button" class="btn" id="cancelDeleteRecord">
+                Keep record
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="journal-dialog-footer">
+          <button type="button" class="btn danger" id="deleteRecord" hidden>
+            Delete trade
+          </button>
+          <div class="copy-actions">
+            <button type="button" class="btn" id="cancelRecord">Cancel</button
+            ><button type="submit" class="btn primary" id="submitRecord">
+              Save record
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
     <script>
       (function () {
         "use strict";
@@ -2735,7 +3356,10 @@
         // -----------------------------------------------------------------------
         // MAIN RECALCULATION & UI RE-RENDER
         // -----------------------------------------------------------------------
+        let currentPlan = null;
         function recalculate() {
+          currentPlan = null;
+          document.getElementById("btnSaveJournal").disabled = true;
           syncControls();
           if (!validateInputs()) return;
           // Parse & sanitize input values
@@ -2927,6 +3551,24 @@
             Math.min(100, cashUtilizationPct) + "%";
           el.btnCopyOrder.disabled = el.btnCopyJournal.disabled =
             effectiveShares <= 0 || targetOutcome.reachable === false;
+          if (!el.btnCopyOrder.disabled) {
+            currentPlan = {
+              ticker: state.ticker,
+              direction: state.isShort ? "short" : "long",
+              shares: effectiveShares,
+              entry: state.entry,
+              stop: state.stop,
+              target: targetOutcome.targetPrice,
+              riskBudget,
+              estimatedLoss: stopOutcome.netLoss,
+              estimatedFees: stopOutcome.fees,
+              usdMyr: state.usdMyr,
+              isPromo: state.isPromo,
+              rrRatio: state.rrRatio,
+              accountBalance: state.balance,
+            };
+            document.getElementById("btnSaveJournal").disabled = false;
+          }
           if (state.isManualSizing && stopOutcome.netLoss > riskBudget) {
             el.bannersContainer.insertAdjacentHTML(
               "afterbegin",
@@ -3791,6 +4433,11 @@
           "tradeNotes",
         ];
         const views = {
+          journal: [
+            "Trade journal",
+            "Learn from every trade.",
+            "Record the plan. Track the outcome. Refine your process.",
+          ],
           plan: [
             "Trade planner",
             "Every trade starts with a plan.",
@@ -3817,6 +4464,12 @@
         }
         function switchView(name, focus = true) {
           if (!views[name]) name = "plan";
+          document
+            .querySelector(".workspace")
+            .classList.toggle("journal-mode", name === "journal");
+          document.querySelector(".steps").hidden = name === "journal";
+          document.getElementById("btnResetDefaults").hidden =
+            name === "journal";
           document
             .querySelectorAll("[data-panel]")
             .forEach((panel) => (panel.hidden = panel.dataset.panel !== name));
@@ -3991,6 +4644,747 @@
           switchView(location.hash.slice(1)),
         );
         switchView(location.hash.slice(1), false);
+
+        // Journal records are cloud-backed. Calculator inputs remain local.
+        const j = (id) => document.getElementById(id);
+        const config = window.TRADECRAFT_CONFIG || {};
+        let cloud = null,
+          journalUser = null,
+          journalRecords = [],
+          journalLoaded = false;
+        let journalEpoch = 0,
+          journalLoading = null,
+          editingRecord = null,
+          journalSaving = false;
+        try {
+          if (
+            config.supabaseUrl &&
+            config.supabaseKey &&
+            window.TradecraftCloud
+          ) {
+            cloud = window.TradecraftCloud.createClient(
+              config.supabaseUrl,
+              config.supabaseKey,
+              {
+                auth: {
+                  persistSession: true,
+                  autoRefreshToken: true,
+                  detectSessionInUrl: true,
+                  flowType: "pkce",
+                },
+              },
+            );
+          }
+        } catch {
+          /* The setup message stays visible for invalid deployment config. */
+        }
+        const money = (value) =>
+          new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(value);
+        const price = (value) => "$" + value.toFixed(value < 1 ? 4 : 2);
+        const netResult = (record) =>
+          (record.plan.direction === "short"
+            ? record.entry - record.exit
+            : record.exit - record.entry) *
+            record.shares -
+          record.fees;
+        function localDateTime(iso = new Date().toISOString()) {
+          const date = new Date(iso);
+          return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 16);
+        }
+        function journalMessage(message) {
+          j("journalNotice").textContent = message;
+          j("journalNotice").hidden = !message;
+        }
+        function recordMessage(message) {
+          j("recordError").textContent = message;
+          j("recordError").hidden = !message;
+        }
+        function cloudError(error) {
+          if (error?.code === "42P01" || error?.code === "PGRST205")
+            return "Journal database is not set up yet. Run the project’s Supabase schema before saving trades.";
+          return (
+            error?.message ||
+            "Could not reach your journal. Check your connection and try again."
+          );
+        }
+        function validRecord(raw) {
+          const finite = (v, min = 0, max = 1e9) =>
+            typeof v === "number" && Number.isFinite(v) && v >= min && v <= max;
+          const date = (v) =>
+            typeof v === "string" &&
+            /^\d{4}-\d{2}-\d{2}T/.test(v) &&
+            Number.isFinite(Date.parse(v));
+          const p = raw?.plan;
+          if (
+            !raw ||
+            !p ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+              raw.id,
+            ) ||
+            !date(raw.createdAt) ||
+            !date(raw.entryAt) ||
+            !["planned", "open", "closed"].includes(raw.status) ||
+            !finite(raw.shares, 1) ||
+            !Number.isInteger(raw.shares) ||
+            !finite(raw.entry, 0.0001) ||
+            typeof raw.notes !== "string" ||
+            raw.notes.length > 10000 ||
+            typeof p.ticker !== "string" ||
+            !/^[A-Z0-9.\-]{1,12}$/.test(p.ticker) ||
+            !["long", "short"].includes(p.direction) ||
+            !finite(p.shares, 1) ||
+            !Number.isInteger(p.shares) ||
+            !finite(p.entry, 0.0001) ||
+            !finite(p.stop, 0.0001) ||
+            !finite(p.target, 0.0001, 1e12) ||
+            !finite(p.riskBudget) ||
+            !finite(p.estimatedLoss, 0, 1e18) ||
+            !finite(p.estimatedFees, 0, 1e18) ||
+            !finite(p.usdMyr, 0.01) ||
+            typeof p.isPromo !== "boolean" ||
+            !finite(p.rrRatio, 0.5, 10) ||
+            !finite(p.accountBalance, 1)
+          )
+            throw new Error(
+              "This file contains an invalid trade record. Nothing was imported.",
+            );
+          if (
+            raw.status === "closed" &&
+            (!finite(raw.exit, 0.0001) ||
+              !finite(raw.fees) ||
+              !date(raw.closedAt) ||
+              Date.parse(raw.closedAt) < Date.parse(raw.entryAt))
+          )
+            throw new Error(
+              "Closed trades need valid exit details, fees, and an exit time after entry.",
+            );
+          return {
+            id: raw.id,
+            createdAt: raw.createdAt,
+            status: raw.status,
+            entryAt: raw.entryAt,
+            shares: raw.shares,
+            entry: raw.entry,
+            exit: raw.status === "closed" ? raw.exit : null,
+            fees: raw.status === "closed" ? raw.fees : null,
+            closedAt: raw.status === "closed" ? raw.closedAt : null,
+            notes: raw.notes,
+            plan: Object.fromEntries(
+              [
+                "ticker",
+                "direction",
+                "shares",
+                "entry",
+                "stop",
+                "target",
+                "riskBudget",
+                "estimatedLoss",
+                "estimatedFees",
+                "usdMyr",
+                "isPromo",
+                "rrRatio",
+                "accountBalance",
+              ].map((key) => [key, p[key]]),
+            ),
+          };
+        }
+        function renderJournal() {
+          const closed = journalRecords.filter(
+            (record) => record.status === "closed",
+          );
+          j("journalCount").textContent = journalUser
+            ? journalRecords.length
+            : "—";
+          const total = closed.reduce(
+            (sum, record) => sum + netResult(record),
+            0,
+          );
+          j("journalNet").textContent = closed.length ? money(total) : "—";
+          j("journalNet").className = total < 0 ? "loss-text" : "profit-text";
+          j("journalWinRate").textContent = closed.length
+            ? Math.round(
+                (closed.filter((record) => netResult(record) > 0).length /
+                  closed.length) *
+                  100,
+              ) + "%"
+            : "—";
+          const query = j("journalSearch").value.trim().toLowerCase(),
+            status = j("journalFilter").value;
+          const records = journalRecords
+            .filter(
+              (record) =>
+                (status === "all" || record.status === status) &&
+                (record.plan.ticker + " " + record.notes)
+                  .toLowerCase()
+                  .includes(query),
+            )
+            .sort((a, b) => Date.parse(b.entryAt) - Date.parse(a.entryAt));
+          j("journalRows").replaceChildren();
+          records.forEach((record) => {
+            const tr = document.createElement("tr");
+            const values = [
+              new Date(record.entryAt).toLocaleString([], {
+                dateStyle: "medium",
+                timeStyle: "short",
+              }),
+              record.plan.ticker + " · " + record.plan.direction.toUpperCase(),
+              record.status[0].toUpperCase() + record.status.slice(1),
+              String(record.shares),
+              price(record.entry),
+              record.exit === null ? "—" : price(record.exit),
+              record.status === "closed" ? money(netResult(record)) : "—",
+            ];
+            values.forEach((text, index) => {
+              const td = document.createElement("td");
+              td.textContent = text;
+              td.dataset.label = [
+                "Date / time",
+                "Trade",
+                "Status",
+                "Shares",
+                "Entry",
+                "Exit",
+                "Net P&L",
+              ][index];
+              if (index === 6 && record.status === "closed")
+                td.className =
+                  netResult(record) < 0 ? "loss-text" : "profit-text";
+              tr.append(td);
+            });
+            const td = document.createElement("td"),
+              button = document.createElement("button");
+            button.type = "button";
+            button.className = "btn";
+            button.textContent = "View / edit";
+            button.setAttribute(
+              "aria-label",
+              "Edit " + record.plan.ticker + " trade",
+            );
+            button.addEventListener("click", () => openRecord(record));
+            td.append(button);
+            tr.append(td);
+            j("journalRows").append(tr);
+          });
+          j("journalEmpty").hidden =
+            !!records.length || !journalUser || !journalLoaded;
+          j("journalEmpty").querySelector("h2").textContent =
+            journalRecords.length
+              ? "No trades match your filters."
+              : "Your first entry starts with a plan.";
+          j("journalEmpty").querySelector("p").textContent =
+            journalRecords.length
+              ? "Try another ticker, note, or status."
+              : "Set up a trade, then select “Save to journal” on the review screen.";
+          j("journalTableWrap").hidden = !records.length;
+          j("journalMatches").hidden = !journalLoaded || !journalUser;
+          j("journalMatches").textContent =
+            records.length + " of " + journalRecords.length + " records";
+          j("exportJournal").disabled =
+            !journalUser || !journalLoaded || !journalRecords.length;
+          j("importJournal").disabled = !journalUser || !journalLoaded;
+          j("refreshJournal").disabled = !journalUser;
+        }
+        async function loadJournal() {
+          if (!journalUser || !cloud) return;
+          if (journalLoading) return journalLoading;
+          const userId = journalUser.id,
+            epoch = journalEpoch;
+          j("journalSyncStatus").textContent = "Syncing…";
+          journalLoading = (async () => {
+            try {
+              const all = [];
+              for (let from = 0; ; from += 500) {
+                const { data, error } = await cloud
+                  .from("tradecraft_journal")
+                  .select("id,record,version")
+                  .eq("user_id", userId)
+                  .order("id")
+                  .range(from, from + 499);
+                if (error) throw error;
+                all.push(
+                  ...data.map((row) => ({
+                    ...validRecord(row.record),
+                    _version: row.version,
+                  })),
+                );
+                if (data.length < 500) break;
+              }
+              if (epoch !== journalEpoch || userId !== journalUser?.id) return;
+              journalRecords = all;
+              journalLoaded = true;
+              renderJournal();
+              journalMessage("");
+              j("journalSyncStatus").textContent =
+                "Synced at " +
+                new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+            } catch (error) {
+              if (epoch !== journalEpoch) return;
+              j("journalSyncStatus").textContent = "Sync failed · retry";
+              journalMessage(cloudError(error));
+            } finally {
+              if (epoch === journalEpoch) journalLoading = null;
+            }
+          })();
+          return journalLoading;
+        }
+        function updateAuth(user) {
+          if (journalUser?.id !== user?.id) {
+            journalEpoch++;
+            journalRecords = [];
+            journalLoaded = false;
+            journalLoading = null;
+            if (j("journalDialog").open) j("journalDialog").close();
+            editingRecord = null;
+          }
+          journalUser = user;
+          j("journalAuth").hidden = !!user;
+          j("journalAccount").hidden = !user;
+          j("journalEmailDisplay").textContent = user?.email || "";
+          j("authMessage").textContent = "";
+          if (!user) {
+            j("recoveryForm").hidden = true;
+            j("recordNotes").value = "";
+            j("journalPlanSummary").textContent = "";
+            j("recordError").textContent = "";
+          }
+          renderJournal();
+          if (user) loadJournal();
+          else j("journalSyncStatus").textContent = "Sign in to sync";
+        }
+        function openRecord(record = null) {
+          if (!journalUser) {
+            switchView("journal");
+            journalMessage(
+              cloud
+                ? "Sign in to save and sync your trade records."
+                : "Cloud journal setup is required before signing in.",
+            );
+            return;
+          }
+          if (!record && !currentPlan) return;
+          editingRecord = record
+            ? structuredClone(record)
+            : {
+                id: crypto.randomUUID(),
+                createdAt: new Date().toISOString(),
+                status: "planned",
+                entryAt: new Date().toISOString(),
+                entry: currentPlan.entry,
+                shares: currentPlan.shares,
+                exit: null,
+                closedAt: null,
+                fees: null,
+                notes: j("tradeNotes").value.slice(0, 10000),
+                plan: structuredClone(currentPlan),
+              };
+          j("journalDialogTitle").textContent =
+            (record ? "Edit " : "Record ") +
+            editingRecord.plan.ticker +
+            " trade";
+          j("journalPlanSummary").textContent =
+            editingRecord.plan.direction.toUpperCase() +
+            " · Original plan: " +
+            editingRecord.plan.shares +
+            " shares @ " +
+            price(editingRecord.plan.entry) +
+            " · Stop " +
+            price(editingRecord.plan.stop) +
+            " · Target " +
+            price(editingRecord.plan.target) +
+            " · Estimated risk " +
+            money(editingRecord.plan.estimatedLoss);
+          j("recordStatus").value = editingRecord.status;
+          j("recordDate").value = localDateTime(editingRecord.entryAt);
+          j("recordEntry").value = editingRecord.entry;
+          j("recordShares").value = editingRecord.shares;
+          j("recordExit").value = editingRecord.exit ?? "";
+          j("recordFees").value = editingRecord.fees ?? "";
+          j("recordClosedAt").value = localDateTime(
+            editingRecord.closedAt || new Date().toISOString(),
+          );
+          j("recordNotes").value = editingRecord.notes;
+          j("deleteRecord").hidden = !record;
+          j("journalDeleteConfirm").hidden = true;
+          recordMessage("");
+          updateRecordFields();
+          j("journalDialog").showModal();
+        }
+        function updateRecordFields() {
+          const closed = j("recordStatus").value === "closed",
+            planned = j("recordStatus").value === "planned";
+          j("recordExitFields").hidden = !closed;
+          j("recordExitFields").disabled = !closed;
+          j("recordEntryLabel").textContent =
+            (planned ? "Planned" : "Actual average") + " entry price (USD)";
+          j("recordDateLabel").textContent =
+            (planned ? "Planned entry" : "Entry") + " date / time";
+          j("recordClosedAt").min = j("recordDate").value;
+          const ids = [
+            "recordEntry",
+            "recordShares",
+            "recordExit",
+            "recordFees",
+          ];
+          j("recordNet").textContent =
+            closed &&
+            ids.every((id) => j(id).value !== "" && j(id).checkValidity())
+              ? money(
+                  netResult({
+                    plan: editingRecord.plan,
+                    entry: Number(j("recordEntry").value),
+                    shares: Number(j("recordShares").value),
+                    exit: Number(j("recordExit").value),
+                    fees: Number(j("recordFees").value),
+                  }),
+                )
+              : "—";
+        }
+        async function writeRecord(record, deleting = false) {
+          if (!journalUser)
+            throw Error("Your session ended. Sign in again before saving.");
+          const userId = journalUser.id;
+          let query;
+          if (deleting)
+            query = cloud
+              .from("tradecraft_journal")
+              .delete()
+              .eq("user_id", userId)
+              .eq("id", record.id)
+              .eq("version", record._version);
+          else if (record._version)
+            query = cloud
+              .from("tradecraft_journal")
+              .update({ record: validRecord(record) })
+              .eq("user_id", userId)
+              .eq("id", record.id)
+              .eq("version", record._version);
+          else
+            query = cloud.from("tradecraft_journal").insert({
+              user_id: userId,
+              id: record.id,
+              record: validRecord(record),
+            });
+          const { data, error } = await query.select("id,record,version");
+          if (error) {
+            // A retry after a lost response must not create another journal entry.
+            if (!deleting && !record._version && error.code === "23505")
+              throw Error(
+                "This record may already have been saved. Close this dialog and refresh the journal before retrying.",
+              );
+            throw error;
+          }
+          if (!data.length)
+            throw Error(
+              "This trade changed on another device. Close this dialog, refresh the journal, and reopen the latest record.",
+            );
+          if (userId !== journalUser?.id) return;
+          journalEpoch++;
+          journalLoading = null;
+          journalRecords = journalRecords.filter(
+            (item) => item.id !== record.id,
+          );
+          if (!deleting)
+            journalRecords.push({
+              ...validRecord(data[0].record),
+              _version: data[0].version,
+            });
+          renderJournal();
+          j("journalDialog").close();
+          switchView("journal");
+          showToast(
+            deleting ? "Trade deleted." : "Trade saved to your journal.",
+          );
+          await loadJournal();
+        }
+        function setJournalBusy(busy) {
+          journalSaving = busy;
+          j("journalForm")
+            .querySelectorAll("button")
+            .forEach((button) => (button.disabled = busy));
+        }
+        j("journalForm").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          if (
+            journalSaving ||
+            !editingRecord ||
+            !j("journalForm").reportValidity()
+          )
+            return;
+          setJournalBusy(true);
+          recordMessage("");
+          try {
+            const closed = j("recordStatus").value === "closed";
+            const record = {
+              ...editingRecord,
+              status: j("recordStatus").value,
+              entryAt: new Date(j("recordDate").value).toISOString(),
+              entry: Number(j("recordEntry").value),
+              shares: Number(j("recordShares").value),
+              notes: j("recordNotes").value,
+              exit: closed ? Number(j("recordExit").value) : null,
+              fees: closed ? Number(j("recordFees").value) : null,
+              closedAt: closed
+                ? new Date(j("recordClosedAt").value).toISOString()
+                : null,
+            };
+            await writeRecord(record);
+          } catch (error) {
+            recordMessage(cloudError(error));
+          } finally {
+            setJournalBusy(false);
+          }
+        });
+        j("journalForm").addEventListener("input", updateRecordFields);
+        j("recordStatus").addEventListener("change", updateRecordFields);
+        ["closeJournalDialog", "cancelRecord"].forEach((id) =>
+          j(id).addEventListener("click", () => j("journalDialog").close()),
+        );
+        j("journalDialog").addEventListener("cancel", (event) => {
+          if (journalSaving) event.preventDefault();
+        });
+        j("deleteRecord").addEventListener("click", () => {
+          j("journalDeleteConfirm").hidden = false;
+          j("confirmDeleteRecord").focus();
+        });
+        j("cancelDeleteRecord").addEventListener(
+          "click",
+          () => (j("journalDeleteConfirm").hidden = true),
+        );
+        j("confirmDeleteRecord").addEventListener("click", async () => {
+          if (journalSaving) return;
+          setJournalBusy(true);
+          try {
+            await writeRecord(editingRecord, true);
+          } catch (error) {
+            recordMessage(cloudError(error));
+          } finally {
+            setJournalBusy(false);
+          }
+        });
+        j("btnSaveJournal").addEventListener("click", () => openRecord());
+        ["journalSearch", "journalFilter"].forEach((id) =>
+          j(id).addEventListener("input", renderJournal),
+        );
+        j("refreshJournal").addEventListener("click", loadJournal);
+        window.addEventListener("focus", () => {
+          if (location.hash === "#journal") loadJournal();
+        });
+        window.addEventListener("online", () => {
+          if (location.hash === "#journal") loadJournal();
+        });
+        j("exportJournal").addEventListener("click", () => {
+          if (!journalLoaded || !journalUser) return;
+          const data = {
+            format: "tradecraft-journal",
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            records: journalRecords.map(validRecord),
+          };
+          const url = URL.createObjectURL(
+            new Blob([JSON.stringify(data, null, 2)], {
+              type: "application/json",
+            }),
+          );
+          const a = document.createElement("a");
+          a.href = url;
+          a.download =
+            "tradecraft-journal-" +
+            new Date().toISOString().slice(0, 10) +
+            ".json";
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        });
+        j("importJournal").addEventListener("click", () =>
+          j("journalFile").click(),
+        );
+        j("journalFile").addEventListener("change", async () => {
+          const file = j("journalFile").files[0];
+          j("journalFile").value = "";
+          if (!file || !journalUser) return;
+          const userId = journalUser.id;
+          j("importJournal").disabled = true;
+          try {
+            if (file.size > 5 * 1024 * 1024)
+              throw Error("Choose a journal backup smaller than 5 MB.");
+            const backup = JSON.parse(await file.text());
+            if (
+              backup.format !== "tradecraft-journal" ||
+              backup.version !== 1 ||
+              !Array.isArray(backup.records) ||
+              backup.records.length > 1000
+            )
+              throw Error(
+                "Choose a supported Tradecraft JSON backup with at most 1,000 records.",
+              );
+            const records = backup.records.map(validRecord);
+            if (
+              new Set(records.map((record) => record.id)).size !==
+              records.length
+            )
+              throw Error(
+                "The backup contains duplicate IDs. Nothing was imported.",
+              );
+            if (userId !== journalUser?.id)
+              throw Error("Your session changed. Please try importing again.");
+            if (records.length) {
+              const { error } = await cloud.from("tradecraft_journal").upsert(
+                records.map((record) => ({
+                  user_id: userId,
+                  id: record.id,
+                  record,
+                })),
+                { onConflict: "user_id,id", ignoreDuplicates: true },
+              );
+              if (error) throw error;
+            }
+            journalEpoch++;
+            journalLoading = null;
+            await loadJournal();
+            journalMessage(
+              "Backup imported. Existing record IDs were kept unchanged.",
+            );
+          } catch (error) {
+            journalMessage(cloudError(error));
+          } finally {
+            renderJournal();
+          }
+        });
+
+        const authRedirect = () =>
+          location.origin + location.pathname + "#journal";
+        const setAuthBusy = (busy) =>
+          j("journalSignIn")
+            .querySelectorAll("button")
+            .forEach((button) => (button.disabled = busy));
+        async function authenticate(kind) {
+          if (!cloud) return;
+          if (kind !== "google" && !j("authEmail").reportValidity()) return;
+          if (
+            ["signin", "signup"].includes(kind) &&
+            !j("authPassword").reportValidity()
+          )
+            return;
+          setAuthBusy(true);
+          j("authMessage").textContent = "";
+          try {
+            const email = j("authEmail").value.trim(),
+              password = j("authPassword").value;
+            let result;
+            if (kind === "signup")
+              result = await cloud.auth.signUp({
+                email,
+                password,
+                options: { emailRedirectTo: authRedirect() },
+              });
+            else if (kind === "reset")
+              result = await cloud.auth.resetPasswordForEmail(email, {
+                redirectTo: authRedirect(),
+              });
+            else if (kind === "google")
+              result = await cloud.auth.signInWithOAuth({
+                provider: "google",
+                options: { redirectTo: authRedirect() },
+              });
+            else
+              result = await cloud.auth.signInWithPassword({ email, password });
+            if (result.error) throw result.error;
+            if (kind === "signup" && !result.data.session)
+              j("authMessage").textContent =
+                "Check your email to confirm your account, then sign in here.";
+            if (kind === "reset")
+              j("authMessage").textContent =
+                "If the account exists, a password-reset email is on its way.";
+            j("authPassword").value = "";
+          } catch (error) {
+            j("authMessage").textContent = cloudError(error);
+          } finally {
+            setAuthBusy(false);
+          }
+        }
+        j("authEmailForm").addEventListener("submit", (event) => {
+          event.preventDefault();
+          authenticate("signin");
+        });
+        j("createAccount").addEventListener("click", () =>
+          authenticate("signup"),
+        );
+        j("googleSignIn").addEventListener("click", () =>
+          authenticate("google"),
+        );
+        j("resetPassword").addEventListener("click", () =>
+          authenticate("reset"),
+        );
+        j("recoveryForm").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          j("updatePassword").disabled = true;
+          try {
+            const { error } = await cloud.auth.updateUser({
+              password: j("newPassword").value,
+            });
+            if (error) throw error;
+            j("newPassword").value = "";
+            j("recoveryForm").hidden = true;
+            journalMessage(
+              "Password updated. You can use it on your other devices.",
+            );
+          } catch (error) {
+            j("recoveryMessage").textContent = cloudError(error);
+          } finally {
+            j("updatePassword").disabled = false;
+          }
+        });
+        j("signOutJournal").addEventListener("click", async () => {
+          j("signOutJournal").disabled = true;
+          try {
+            const { error } = await cloud.auth.signOut({ scope: "local" });
+            if (error) throw error;
+            updateAuth(null);
+            journalMessage(
+              "Signed out on this device. Your records remain in your account.",
+            );
+          } catch (error) {
+            journalMessage(cloudError(error));
+          } finally {
+            j("signOutJournal").disabled = false;
+          }
+        });
+        j("journalSetup").hidden = !!cloud;
+        j("journalSignIn").hidden = !cloud;
+        j("googleSignIn").hidden = !config.googleAuthEnabled;
+        if (cloud) {
+          cloud.auth.onAuthStateChange((event, session) => {
+            setTimeout(() => {
+              updateAuth(session?.user || null);
+              if (event === "PASSWORD_RECOVERY") {
+                switchView("journal");
+                j("recoveryForm").hidden = false;
+                j("newPassword").focus();
+              }
+            }, 0);
+          });
+          cloud.auth
+            .getSession()
+            .then(({ data, error }) => {
+              if (error) journalMessage(cloudError(error));
+              else updateAuth(data.session?.user || null);
+            })
+            .catch((error) => journalMessage(cloudError(error)));
+        }
+        document
+          .querySelectorAll('[data-view="journal"]')
+          .forEach((button) => button.addEventListener("click", loadJournal));
+        window.addEventListener("popstate", () => {
+          if (location.hash === "#journal") loadJournal();
+        });
+        renderJournal();
 
         // Initial execution on page load
         recalculate();

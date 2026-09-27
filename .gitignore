@@ -3,3 +3,8 @@ test-results/
 .DS_Store
 Thumbs.db
 *.log
+
+dist/
+.env
+.env.local
+.vercel/
