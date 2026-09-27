@@ -1,0 +1,13 @@
+{
+  "name": "tradecraft-calculator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An offline, fee-aware trading planner for Moomoo MY US equities",
+  "scripts": {
+    "test": "node --test tests/calculator.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.0",
+    "prettier": "^3.9.9"
+  }
+}
