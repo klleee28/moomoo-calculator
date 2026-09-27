@@ -1,0 +1,2901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moomoo MY // US Day Trading Position Sizer & Fee Terminal</title>
+  <style>
+    /* ==========================================================================
+       FINANCIAL TERMINAL DESIGN SYSTEM (DARK MODE DEFAULT)
+       Zero External Dependencies | Pure Native CSS3 & High-Contrast Typography
+       ========================================================================== */
+    :root {
+      --bg-base: #0B0E14;
+      --bg-card: #111622;
+      --bg-card-hover: #161D2D;
+      --bg-card-subtle: #141A28;
+      --bg-input: #0E131C;
+      --bg-input-focus: #141B29;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.14);
+      --border-focus: #38BDF8;
+      --border-glow: rgba(56, 189, 248, 0.25);
+      
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --text-bright: #FFFFFF;
+
+      --accent-cyan: #38BDF8;
+      --accent-cyan-dim: rgba(56, 189, 248, 0.12);
+      --accent-cyan-border: rgba(56, 189, 248, 0.3);
+
+      --color-profit: #10B981;
+      --color-profit-dim: rgba(16, 185, 129, 0.12);
+      --color-profit-border: rgba(16, 185, 129, 0.3);
+
+      --color-loss: #F43F5E;
+      --color-loss-dim: rgba(244, 63, 94, 0.12);
+      --color-loss-border: rgba(244, 63, 94, 0.3);
+
+      --color-warn: #F59E0B;
+      --color-warn-dim: rgba(245, 158, 11, 0.12);
+      --color-warn-border: rgba(245, 158, 11, 0.35);
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", "SF Mono", Consolas, "Courier New", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+      --shadow-glow: 0 0 24px -4px rgba(56, 189, 248, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px 32px;
+      overflow-x: hidden;
+    }
+
+    /* Tabular numeric alignment for all financial numbers */
+    .num {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-base);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #252F42;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #36445E;
+    }
+
+    /* ==========================================================================
+       CONTAINER & HEADER
+       ========================================================================== */
+    .terminal-container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .terminal-header {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal-header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #38BDF8 0%, #10B981 50%, #6366F1 100%);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #1E293B, #0F172A);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-cyan);
+    }
+
+    .brand-info h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-info h1 span.sub-badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid var(--accent-cyan-border);
+      text-transform: uppercase;
+    }
+
+    .brand-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--color-profit);
+      border: 1px solid var(--color-profit-border);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--color-profit);
+      box-shadow: 0 0 8px var(--color-profit);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .btn-header {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-header:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-medium);
+    }
+
+    /* ==========================================================================
+       MAIN WORKSPACE GRID
+       ========================================================================== */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 460px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Section Cards */
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+
+    .panel-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title svg {
+      color: var(--accent-cyan);
+    }
+
+    .panel-badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Form Fields & Grid */
+    .form-group {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .form-hint {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix, .input-suffix {
+      position: absolute;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      pointer-events: none;
+      user-select: none;
+    }
+    .input-prefix { left: 12px; }
+    .input-suffix { right: 12px; }
+
+    .text-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-bright);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 14px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .text-input.has-prefix { padding-left: 28px; }
+    .text-input.has-suffix { padding-right: 50px; }
+
+    .text-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-input-focus);
+      box-shadow: 0 0 0 3px var(--border-glow);
+    }
+
+    .text-input:hover:not(:focus) {
+      border-color: var(--border-medium);
+    }
+
+    /* Range Sliders */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .custom-slider {
+      flex: 1;
+      height: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #1E2738;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+      transition: transform 0.1s ease;
+    }
+    .custom-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Quick Chips */
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip-btn {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .chip-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-medium);
+    }
+    .chip-btn.active {
+      background: var(--accent-cyan-dim);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan-border);
+      font-weight: 600;
+    }
+
+    /* Toggle Switches (Tabs / Segmented controls) */
+    .segmented-control {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .segment-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .segment-btn:hover:not(.active) {
+      color: var(--text-main);
+    }
+
+    .segment-btn.active {
+      background: #1E273A;
+      color: var(--text-bright);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+
+    .segment-btn.active.promo {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .segment-btn.active.long {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .segment-btn.active.short {
+      background: rgba(244, 63, 94, 0.18);
+      color: #FB7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    /* Fee Schedule Inspector Details */
+    .fee-info-box {
+      background: #0D121B;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    .fee-info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .fee-info-row:last-child {
+      margin-bottom: 0;
+    }
+    .fee-info-val {
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* Two-col input row */
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Quick Preset Stocks Bar */
+    .preset-stocks-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+
+    .preset-stock-pill {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .preset-stock-pill:hover {
+      background: var(--bg-card-hover);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan-border);
+    }
+
+    /* ==========================================================================
+       RIGHT COLUMN: WARNING BANNERS & RESULTS
+       ========================================================================== */
+    .results-column {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Reality-Check Warning Banners */
+    .banner-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert-banner {
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 0.25s ease;
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-banner.friction {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0.05) 100%);
+      border: 1px solid var(--color-warn-border);
+      color: #FDE68A;
+    }
+
+    .alert-banner.capital {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.14) 0%, rgba(56, 189, 248, 0.05) 100%);
+      border: 1px solid var(--accent-cyan-border);
+      color: #BAE6FD;
+    }
+
+    .alert-banner.error {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.16) 0%, rgba(244, 63, 94, 0.06) 100%);
+      border: 1px solid var(--color-loss-border);
+      color: #FECDD3;
+    }
+
+    .alert-banner.info {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(16, 185, 129, 0.05) 100%);
+      border: 1px solid var(--color-profit-border);
+      color: #A7F3D0;
+    }
+
+    .alert-icon-box {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-desc {
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0.92;
+    }
+
+    .alert-action-btn {
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .alert-action-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Key Metrics Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .metric-card:hover {
+      border-color: var(--border-medium);
+      transform: translateY(-2px);
+    }
+
+    .metric-card.hero {
+      border-color: var(--accent-cyan-border);
+      background: linear-gradient(145deg, #131A29 0%, #0F1420 100%);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .metric-card.hero::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .metric-badge.safe {
+      background: var(--color-profit-dim);
+      color: var(--color-profit);
+      border: 1px solid var(--color-profit-border);
+    }
+    .metric-badge.warn {
+      background: var(--color-warn-dim);
+      color: var(--color-warn);
+      border: 1px solid var(--color-warn-border);
+    }
+    .metric-badge.alert {
+      background: var(--color-loss-dim);
+      color: var(--color-loss);
+      border: 1px solid var(--color-loss-border);
+    }
+    .metric-badge.neutral {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    .metric-value.hero-val {
+      color: #38BDF8;
+      font-size: 30px;
+    }
+    .metric-value.profit-val {
+      color: #34D399;
+    }
+    .metric-value.loss-val {
+      color: #FB7185;
+    }
+
+    .metric-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .metric-sub b {
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+
+    /* Execution & Copy Strip */
+    .execution-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .order-string-box {
+      background: #090C12;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: #38BDF8;
+      letter-spacing: 0.2px;
+      word-break: break-all;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      user-select: all;
+    }
+
+    .copy-btn-primary {
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #FFFFFF;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+      white-space: nowrap;
+    }
+    .copy-btn-primary:hover {
+      background: linear-gradient(135deg, #0369A1 0%, #075985 100%);
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.55);
+      transform: translateY(-1px);
+    }
+    .copy-btn-primary:active {
+      transform: translateY(0);
+    }
+    .copy-btn-primary.copied {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .copy-secondary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .quick-stats-summary {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .quick-stats-summary span b {
+      color: var(--text-bright);
+      font-family: var(--font-mono);
+    }
+
+    /* Target Ladder & Risk Matrix */
+    .ladder-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .ladder-table-wrapper {
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    .ladder-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .ladder-table th {
+      padding: 10px 12px;
+      background: var(--bg-card-subtle);
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 11px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .ladder-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+
+    .ladder-table tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    .ladder-table tr.active-target td {
+      background: rgba(56, 189, 248, 0.08);
+      font-weight: 700;
+    }
+    .ladder-table tr.active-target td:first-child {
+      border-left: 3px solid var(--accent-cyan);
+    }
+
+    .ladder-table tr.stop-row td {
+      background: rgba(244, 63, 94, 0.05);
+    }
+    .ladder-table tr.stop-row td:first-child {
+      border-left: 3px solid var(--color-loss);
+    }
+
+    .ladder-table tr.breakeven-row td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .ladder-table tr.breakeven-row td:first-child {
+      border-left: 3px solid var(--text-muted);
+    }
+
+    /* Expandable Fee Breakdown Accordion */
+    .breakdown-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .accordion-toggle-icon {
+      transition: transform 0.25s ease;
+      color: var(--text-muted);
+    }
+    .accordion-toggle-icon.expanded {
+      transform: rotate(180deg);
+    }
+
+    .breakdown-body {
+      margin-top: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+    .breakdown-body.open {
+      display: flex;
+    }
+
+    .fee-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .fee-table th {
+      padding: 9px 12px;
+      background: #0E131E;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .fee-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-family: var(--font-mono);
+    }
+
+    .fee-table tr.total-row td {
+      background: #141B2A;
+      font-weight: 700;
+      color: var(--text-bright);
+      border-top: 1px solid var(--border-medium);
+      border-bottom: none;
+    }
+
+    .friction-breakdown-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 768px) {
+      .friction-breakdown-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .friction-mini-card {
+      background: #0C1018;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .friction-mini-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .friction-mini-val {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .friction-mini-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Toast Notification */
+    .toast-notice {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0F172A;
+      border: 1px solid var(--accent-cyan);
+      color: var(--text-bright);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .toast-notice.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer */
+    .terminal-footer {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .terminal-footer span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Tooltip styles */
+    [data-tooltip] {
+      position: relative;
+      cursor: help;
+    }
+    [data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1A2234;
+      color: #E2E8F0;
+      border: 1px solid var(--border-medium);
+      padding: 6px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      pointer-events: none;
+      font-family: var(--font-sans);
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="terminal-container">
+
+    <!-- TERMINAL HEADER -->
+    <header class="terminal-header">
+      <div class="brand-section">
+        <div class="brand-icon">
+          <!-- Terminal / Stock Candlestick SVG Icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="2" x2="12" y2="22"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>
+            MOOMOO // SIZER
+            <span class="sub-badge">MY &rarr; US EQUITIES</span>
+          </h1>
+          <p>Exact position sizing, stop-loss & take-profit accounting for Moomoo Malaysia & US regulatory friction</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-pill" title="Runs 100% locally with zero internet requests">
+          <div class="pulse-dot"></div>
+          OFFLINE ENGINE READY
+        </div>
+        <button class="btn-header" id="btnResetDefaults" title="Restore default settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+          Reset
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN TWO-COLUMN WORKSPACE -->
+    <main class="workspace-grid">
+
+      <!-- LEFT COLUMN: INPUT CONTROLS -->
+      <section class="inputs-column" style="display: flex; flex-direction: column; gap: 18px;">
+
+        <!-- CARD 1: ACCOUNT & RISK CONTROLS -->
+        <div class="panel-card">
+          <div class="panel-title-bar">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+              Account & Risk Budget
+            </div>
+            <div class="panel-badge" id="riskBudgetDisplay">Risk: $10.00</div>
+          </div>
+
+          <!-- Account Balance Input -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="accountBalance">Account Balance (USD)</label>
+              <span class="form-hint">Total cash equity</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-prefix">$</span>
+              <input type="number" id="accountBalance" class="text-input has-prefix" value="1000" min="1" step="100" placeholder="1000">
+            </div>
+            <div class="chips-row">
+              <button type="button" class="chip-btn" data-set="balance:500">$500</button>
+              <button type="button" class="chip-btn active" data-set="balance:1000">$1,000</button>
+              <button type="button" class="chip-btn" data-set="balance:2500">$2,500</button>
+              <button type="button" class="chip-btn" data-set="balance:5000">$5,000</button>
+              <button type="button" class="chip-btn" data-set="balance:10000">$10,000</button>
+              <button type="button" class="chip-btn" data-set="balance:25000">$25,000</button>
+            </div>
+          </div>
+
+          <!-- Risk Percentage Input & Slider -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="riskPercentage">Risk Per Trade (%)</label>
+              <span class="form-hint" id="riskBudgetSublabel">Max allowed net risk: $10.00</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="riskPercentage" class="text-input has-suffix" value="1.0" min="0.1" max="20" step="0.1" placeholder="1.0">
+              <span class="input-suffix">%</span>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="riskSlider" class="custom-slider" min="0.1" max="5.0" step="0.1" value="1.0">
+            </div>
+            <div class="chips-row">
+              <button type="button" class="chip-btn" data-set="risk:0.5">0.5%</button>
+              <button type="button" class="chip-btn active" data-set="risk:1.0">1.0% (Day Trade)</button>
+              <button type="button" class="chip-btn" data-set="risk:1.5">1.5%</button>
+              <button type="button" class="chip-btn" data-set="risk:2.0">2.0% (Swing)</button>
+              <button type="button" class="chip-btn" data-set="risk:3.0">3.0%</button>
+            </div>
+          </div>
+
+          <!-- Risk to Reward Ratio -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="rrRatio">Target Risk-to-Reward (1 : X)</label>
+              <span class="form-hint" id="rrProfitSublabel">Req. Net Profit: $20.00</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-prefix" style="color:var(--text-muted)">1 :</span>
+              <input type="number" id="rrRatio" class="text-input has-prefix" value="2.0" min="0.5" max="10.0" step="0.1" placeholder="2.0">
+            </div>
+            <div class="slider-row">
+              <input type="range" id="rrSlider" class="custom-slider" min="1.0" max="4.0" step="0.1" value="2.0">
+            </div>
+            <div class="chips-row">
+              <button type="button" class="chip-btn" data-set="rr:1.5">1 : 1.5</button>
+              <button type="button" class="chip-btn active" data-set="rr:2.0">1 : 2.0 (Standard)</button>
+              <button type="button" class="chip-btn" data-set="rr:2.5">1 : 2.5</button>
+              <button type="button" class="chip-btn" data-set="rr:3.0">1 : 3.0</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: BROKER & REGULATORY FEE PARAMETERS -->
+        <div class="panel-card">
+          <div class="panel-title-bar">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              Moomoo MY & Fee Parameters
+            </div>
+            <div class="panel-badge">Moomoo Malaysia</div>
+          </div>
+
+          <!-- Commission Toggle: Promo 0% vs Standard 0.03% -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label">Commission Rate Schedule</label>
+              <span class="form-hint" id="promoStatusHint">Promo Active: $0.00</span>
+            </div>
+            <div class="segmented-control">
+              <button type="button" id="btnCommissionPromo" class="segment-btn promo active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                0% Promo (New Acc)
+              </button>
+              <button type="button" id="btnCommissionStd" class="segment-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                0.03% Standard
+              </button>
+            </div>
+          </div>
+
+          <!-- USD / MYR Exchange Rate -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="usdMyrRate">
+                USD / MYR Exchange Rate
+                <span data-tooltip="Used to convert trade value for Malaysian Stamp Duty (RM 1 per RM 1,000 leg, cap RM 1,000)">ⓘ</span>
+              </label>
+              <span class="form-hint">Bank Negara / Moomoo FX</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-prefix" style="color:var(--text-muted)">RM</span>
+              <input type="number" id="usdMyrRate" class="text-input has-prefix" value="4.40" min="3.0" max="6.0" step="0.01" placeholder="4.40">
+            </div>
+            <div class="chips-row">
+              <button type="button" class="chip-btn" data-set="myr:4.25">4.25</button>
+              <button type="button" class="chip-btn active" data-set="myr:4.40">4.40 (Default)</button>
+              <button type="button" class="chip-btn" data-set="myr:4.55">4.55</button>
+              <button type="button" class="chip-btn" data-set="myr:4.70">4.70</button>
+            </div>
+          </div>
+
+          <!-- Fee Structure Transparency Summary -->
+          <div class="fee-info-box">
+            <div class="fee-info-row">
+              <span>Platform Fee:</span>
+              <span class="fee-info-val">$0.99 / executed order ($1.98 RT)</span>
+            </div>
+            <div class="fee-info-row">
+              <span>Commission:</span>
+              <span class="fee-info-val" id="feeBoxCommissionVal">0.00% (Promo Active)</span>
+            </div>
+            <div class="fee-info-row">
+              <span>MY Stamp Duty:</span>
+              <span class="fee-info-val">RM 1.00 / RM 1,000 leg (Cap RM 1k)</span>
+            </div>
+            <div class="fee-info-row">
+              <span>US Settlement:</span>
+              <span class="fee-info-val">$0.003 / share (Buy & Sell, Cap 1%)</span>
+            </div>
+            <div class="fee-info-row">
+              <span>SEC & TAF:</span>
+              <span class="fee-info-val">0.0008% + $0.000166/sh (Sell only)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: TRADE SETUP & ORDER PARAMETERS -->
+        <div class="panel-card">
+          <div class="panel-title-bar">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+              Trade Execution Setup
+            </div>
+            <!-- Trade Direction Segmented Control -->
+            <div class="segmented-control" style="width: 170px;">
+              <button type="button" id="btnDirLong" class="segment-btn long active">LONG</button>
+              <button type="button" id="btnDirShort" class="segment-btn">SHORT</button>
+            </div>
+          </div>
+
+          <!-- Preset Stock Chips -->
+          <div class="preset-stocks-bar">
+            <span style="font-size: 11px; color: var(--text-dim); margin-right: 4px;">Presets:</span>
+            <button type="button" class="preset-stock-pill" data-preset="NVDA,125.00,122.50">NVDA ($125 / $122.50)</button>
+            <button type="button" class="preset-stock-pill" data-preset="TSLA,240.00,235.00">TSLA ($240 / $235)</button>
+            <button type="button" class="preset-stock-pill" data-preset="AAPL,180.00,178.00">AAPL ($180 / $178)</button>
+            <button type="button" class="preset-stock-pill" data-preset="AMD,140.00,138.50">AMD ($140 / $138.50)</button>
+            <button type="button" class="preset-stock-pill" data-preset="SPY,550.00,547.50">SPY ($550 / $547.50)</button>
+          </div>
+
+          <div class="two-col-grid">
+            <!-- Ticker Symbol -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="tradeTicker">Symbol / Ticker</label>
+              </div>
+              <div class="input-wrapper">
+                <input type="text" id="tradeTicker" class="text-input" value="NVDA" maxlength="6" style="text-transform: uppercase;">
+              </div>
+            </div>
+
+            <!-- Position Mode (Auto vs Manual shares) -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label">Sizing Mode</label>
+              </div>
+              <div class="segmented-control">
+                <button type="button" id="btnModeAuto" class="segment-btn active" style="font-size: 11px;">Auto Max Risk</button>
+                <button type="button" id="btnModeManual" class="segment-btn" style="font-size: 11px;">Custom Size</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+            <!-- Entry Price -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="entryPrice">Entry Price ($)</label>
+              </div>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="entryPrice" class="text-input has-prefix" value="150.00" min="0.01" step="0.01" placeholder="150.00">
+              </div>
+            </div>
+
+            <!-- Stop-Loss Price -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="stopPrice">Stop-Loss Price ($)</label>
+              </div>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="stopPrice" class="text-input has-prefix" value="147.00" min="0.01" step="0.01" placeholder="147.00">
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Stop Distance Indicator -->
+          <div id="stopDistanceRow" style="display: flex; justify-content: space-between; align-items: center; background: #0C111A; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 4px; font-size: 12px;">
+            <span style="color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <span id="stopDistanceDot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-loss);"></span>
+              Stop Distance:
+            </span>
+            <span class="num" id="stopDistanceVal" style="font-weight: 700; color: #FB7185;">$3.00 (-2.00%)</span>
+          </div>
+
+          <!-- Manual Share Override Box (Hidden unless Custom Size clicked) -->
+          <div id="manualSharesGroup" class="form-group" style="display: none; margin-top: 14px; background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--accent-cyan-border); padding: 12px; border-radius: var(--radius-sm);">
+            <div class="form-label-row">
+              <label class="form-label" for="customSharesInput" style="color: var(--accent-cyan);">Custom Share Count Override</label>
+              <span class="form-hint" id="customSharesHint">Testing manual shares</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="customSharesInput" class="text-input" value="2" min="1" step="1">
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: WARNING BANNERS, RESULTS CARDS, EXECUTION BAR, LADDER -->
+      <section class="results-column">
+
+        <!-- REALITY-CHECK WARNING BANNERS CONTAINER -->
+        <div id="bannersContainer" class="banner-container">
+          <!-- Dynamically populated warning banners (Friction, Capital, Errors) -->
+        </div>
+
+        <!-- KEY METRICS DISPLAY CARDS (GRID OF 5) -->
+        <div class="metrics-grid">
+
+          <!-- 1. RECOMMENDED SHARE SIZE (HERO CARD) -->
+          <div class="metric-card hero">
+            <div class="metric-header">
+              <span class="metric-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+                Position Share Size
+              </span>
+              <span class="metric-badge safe" id="badgeShareStatus">Optimal</span>
+            </div>
+            <div class="metric-value hero-val num" id="metricShares">2 <span style="font-size: 16px; font-weight: 500; color: var(--text-muted);">shares</span></div>
+            <div class="metric-sub">
+              <span>Capital Req: <b class="num" id="metricCapital">$300.00</b></span>
+              <span>(<span class="num" id="metricCashPct">30.0%</span> cash)</span>
+            </div>
+            <div class="metric-sub" style="margin-top: 4px; font-size: 11px; color: var(--text-dim);" id="naiveComparisonSub">
+              Naive size: 3 shs (would over-risk to $12.19)
+            </div>
+          </div>
+
+          <!-- 2. MAX ALLOWED NET RISK ($) -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Max Net Risk
+              </span>
+              <span class="metric-badge neutral" id="badgeRiskPct">Budget: 1.00%</span>
+            </div>
+            <div class="metric-value loss-val num" id="metricMaxRisk">$10.00</div>
+            <div class="metric-sub">
+              <span>Actual Net Loss: <b class="num" id="metricActualLoss" style="color: #FB7185;">$9.10</b></span>
+              <span>(<span class="num" id="metricActualLossPct">0.91%</span>)</span>
+            </div>
+            <div class="metric-sub" style="margin-top: 4px; font-size: 11px; color: var(--text-dim);">
+              Gross: <span class="num" id="metricGrossLoss">$6.00</span> + Fees: <span class="num" id="metricLossFees">$3.10</span>
+            </div>
+          </div>
+
+          <!-- 3. ESTIMATED ROUND-TRIP FEES ($) -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
+                Est. Round-Trip Fees
+              </span>
+              <span class="metric-badge" id="badgeFriction">31.0% Drag</span>
+            </div>
+            <div class="metric-value num" id="metricRtFees">$3.10</div>
+            <div class="metric-sub">
+              <span>At Stop: <b class="num" id="metricFeesAtStop">$3.10</b></span>
+              <span>| Target: <b class="num" id="metricFeesAtTarget">$3.11</b></span>
+            </div>
+            <div class="metric-sub" style="margin-top: 4px; font-size: 11px; color: var(--accent-cyan); cursor: pointer;" id="btnQuickExpandFees">
+              &darr; View detailed breakdown
+            </div>
+          </div>
+
+          <!-- 4. CALCULATED TAKE-PROFIT PRICE ($) -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                Take-Profit Target
+              </span>
+              <span class="metric-badge safe" id="badgeTargetRR">1 : 2.0 RR</span>
+            </div>
+            <div class="metric-value profit-val num" id="metricTargetPrice">$161.56</div>
+            <div class="metric-sub">
+              <span>Move: <b class="num" id="metricTargetMove" style="color:#34D399;">+$11.56 (+7.71%)</b></span>
+            </div>
+            <div class="metric-sub" style="margin-top: 4px; font-size: 11px; color: var(--text-muted);">
+              Req Profit: <span class="num" id="metricReqProfit">$20.00</span> | Net: <span class="num" id="metricTargetNetGain" style="color:#34D399;">$20.01</span>
+            </div>
+          </div>
+
+          <!-- 5. BREAKEVEN PRICE ($) -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Breakeven Exit Price
+              </span>
+              <span class="metric-badge neutral" id="badgeBreakeven">0.0R Net Zero</span>
+            </div>
+            <div class="metric-value num" id="metricBreakevenPrice">$151.56</div>
+            <div class="metric-sub">
+              <span>Spread: <b class="num" id="metricBreakevenSpread">+$1.56 (+1.04%)</b></span>
+            </div>
+            <div class="metric-sub" style="margin-top: 4px; font-size: 11px; color: var(--text-dim);">
+              Hurdle: <span class="num" id="metricFeePerShare">$1.55</span> / share needed to cover friction
+            </div>
+          </div>
+
+        </div>
+
+        <!-- EXECUTION ORDER STRING & ONE-CLICK COPY -->
+        <div class="execution-bar">
+          <div class="order-string-box" id="orderStringBox" title="Click or tap Copy Button below to copy">
+            <span id="orderStringText">BUY 2 shares @ $150.00 | STOP: $147.00 | TARGET: $161.56 | MAX LOSS: $9.10</span>
+          </div>
+
+          <div class="copy-secondary-row">
+            <div class="quick-stats-summary">
+              <span>Ticker: <b id="summaryTicker">NVDA</b></span>
+              <span>Direction: <b id="summaryDir" style="color:var(--color-profit);">LONG</b></span>
+              <span>Effective R:R: <b id="summaryEffectiveRR" style="color:#38BDF8;">2.20 R</b></span>
+              <span>Fee Drag: <b id="summaryFeeDrag" style="color:var(--color-warn);">31.0%</b></span>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn-header" id="btnCopyJournal" title="Copy full journal record formatted for Notion / Excel / Trading Diary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Copy Journal
+              </button>
+              <button type="button" class="copy-btn-primary" id="btnCopyOrder">
+                <!-- Copy SVG Icon -->
+                <svg id="copyIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span id="copyBtnText">Copy Order Parameters</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RISK-TO-REWARD PROJECTION LADDER -->
+        <div class="ladder-card">
+          <div class="panel-title-bar">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+              P&amp;L Projection &amp; Risk-Reward Ladder
+            </div>
+            <div class="panel-badge">Net After All Moomoo &amp; US Fees</div>
+          </div>
+
+          <div class="ladder-table-wrapper">
+            <table class="ladder-table">
+              <thead>
+                <tr>
+                  <th>Milestone Level</th>
+                  <th>Exit Price</th>
+                  <th>Price Move</th>
+                  <th>Gross P&amp;L</th>
+                  <th>Total Fees</th>
+                  <th>Net Realized P&amp;L</th>
+                  <th>Account Return</th>
+                </tr>
+              </thead>
+              <tbody id="ladderTableBody">
+                <!-- Dynamically populated rows for Stop, Breakeven, 1.0R, 1.5R, 2.0R, 2.5R, 3.0R, 4.0R -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- EXPANDABLE ITEMIZED FEE BREAKDOWN (ACCORDION) -->
+        <div class="breakdown-card" id="feeBreakdownCard">
+          <div class="accordion-header" id="feeAccordionHeader">
+            <div class="panel-title" style="margin-bottom: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+              Itemized Fee Breakdown Schedule (Moomoo MY vs US Regulatory)
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="panel-badge" id="accordionBadge">Click to expand</span>
+              <svg class="accordion-toggle-icon" id="accordionIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+
+          <div class="breakdown-body" id="feeBreakdownBody">
+            <div class="ladder-table-wrapper">
+              <table class="fee-table">
+                <thead>
+                  <tr>
+                    <th>Fee Component</th>
+                    <th>Rate Formula</th>
+                    <th>Buy Leg ($)</th>
+                    <th>Sell Leg @ Stop ($)</th>
+                    <th>Sell Leg @ Target ($)</th>
+                    <th>Round-Trip (Stop)</th>
+                  </tr>
+                </thead>
+                <tbody id="feeTableBody">
+                  <!-- Dynamically populated line items -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Friction Distribution Cards -->
+            <div class="friction-breakdown-cards">
+              <div class="friction-mini-card">
+                <div class="friction-mini-title">Fixed Platform Friction</div>
+                <div class="friction-mini-val num" id="breakdownFixedVal">$1.98</div>
+                <div class="friction-mini-desc" id="breakdownFixedPct">63.9% of total friction ($0.99 x 2 orders)</div>
+              </div>
+              <div class="friction-mini-card">
+                <div class="friction-mini-title">Malaysian Stamp Duty</div>
+                <div class="friction-mini-val num" id="breakdownStampVal">$0.45</div>
+                <div class="friction-mini-desc" id="breakdownStampPct">RM 2.00 converted @ 4.40 USD/MYR</div>
+              </div>
+              <div class="friction-mini-card">
+                <div class="friction-mini-title">US Regulatory & Settlement</div>
+                <div class="friction-mini-val num" id="breakdownRegVal">$0.66</div>
+                <div class="friction-mini-desc" id="breakdownRegPct">Settlement ($0.003/sh) + SEC + TAF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="terminal-footer">
+      <span>Moomoo Securities Malaysia Sdn. Bhd. US Equities Engine</span>
+      <span>•</span>
+      <span>Brokerage Platform: $0.99/order</span>
+      <span>•</span>
+      <span>Malaysian Stamp Duty: RM 1/RM 1,000 leg (Cap RM 1,000)</span>
+      <span>•</span>
+      <span>Zero External Network Requests (Offline)</span>
+    </footer>
+
+  </div>
+
+  <!-- TOAST NOTIFICATION POPUP -->
+  <div id="toastNotice" class="toast-notice">
+    <!-- Checkmark SVG -->
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-profit);">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toastMessage">Order string copied to clipboard!</span>
+  </div>
+
+  <!-- ==========================================================================
+       VANILLA JAVASCRIPT: FINANCIAL CALCULATION ENGINE & REACTIVE UI
+       ========================================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      // -----------------------------------------------------------------------
+      // STATE MANAGEMENT
+      // -----------------------------------------------------------------------
+      const state = {
+        balance: 1000.0,
+        riskPct: 1.0,
+        rrRatio: 2.0,
+        usdMyr: 4.40,
+        isPromo: true, // true = 0% promo, false = 0.03% standard
+        isShort: false, // false = Long, true = Short
+        ticker: "NVDA",
+        entry: 150.00,
+        stop: 147.00,
+        isManualSizing: false,
+        customShares: 2
+      };
+
+      // -----------------------------------------------------------------------
+      // DOM ELEMENT REFS
+      // -----------------------------------------------------------------------
+      const el = {
+        accountBalance: document.getElementById("accountBalance"),
+        riskPercentage: document.getElementById("riskPercentage"),
+        riskSlider: document.getElementById("riskSlider"),
+        riskBudgetDisplay: document.getElementById("riskBudgetDisplay"),
+        riskBudgetSublabel: document.getElementById("riskBudgetSublabel"),
+        rrRatio: document.getElementById("rrRatio"),
+        rrSlider: document.getElementById("rrSlider"),
+        rrProfitSublabel: document.getElementById("rrProfitSublabel"),
+
+        btnCommissionPromo: document.getElementById("btnCommissionPromo"),
+        btnCommissionStd: document.getElementById("btnCommissionStd"),
+        promoStatusHint: document.getElementById("promoStatusHint"),
+        usdMyrRate: document.getElementById("usdMyrRate"),
+        feeBoxCommissionVal: document.getElementById("feeBoxCommissionVal"),
+
+        btnDirLong: document.getElementById("btnDirLong"),
+        btnDirShort: document.getElementById("btnDirShort"),
+        tradeTicker: document.getElementById("tradeTicker"),
+        btnModeAuto: document.getElementById("btnModeAuto"),
+        btnModeManual: document.getElementById("btnModeManual"),
+        manualSharesGroup: document.getElementById("manualSharesGroup"),
+        customSharesInput: document.getElementById("customSharesInput"),
+        customSharesHint: document.getElementById("customSharesHint"),
+
+        entryPrice: document.getElementById("entryPrice"),
+        stopPrice: document.getElementById("stopPrice"),
+        stopDistanceVal: document.getElementById("stopDistanceVal"),
+        stopDistanceDot: document.getElementById("stopDistanceDot"),
+
+        bannersContainer: document.getElementById("bannersContainer"),
+
+        metricShares: document.getElementById("metricShares"),
+        badgeShareStatus: document.getElementById("badgeShareStatus"),
+        metricCapital: document.getElementById("metricCapital"),
+        metricCashPct: document.getElementById("metricCashPct"),
+        naiveComparisonSub: document.getElementById("naiveComparisonSub"),
+
+        metricMaxRisk: document.getElementById("metricMaxRisk"),
+        badgeRiskPct: document.getElementById("badgeRiskPct"),
+        metricActualLoss: document.getElementById("metricActualLoss"),
+        metricActualLossPct: document.getElementById("metricActualLossPct"),
+        metricGrossLoss: document.getElementById("metricGrossLoss"),
+        metricLossFees: document.getElementById("metricLossFees"),
+
+        metricRtFees: document.getElementById("metricRtFees"),
+        badgeFriction: document.getElementById("badgeFriction"),
+        metricFeesAtStop: document.getElementById("metricFeesAtStop"),
+        metricFeesAtTarget: document.getElementById("metricFeesAtTarget"),
+        btnQuickExpandFees: document.getElementById("btnQuickExpandFees"),
+
+        metricTargetPrice: document.getElementById("metricTargetPrice"),
+        badgeTargetRR: document.getElementById("badgeTargetRR"),
+        metricTargetMove: document.getElementById("metricTargetMove"),
+        metricReqProfit: document.getElementById("metricReqProfit"),
+        metricTargetNetGain: document.getElementById("metricTargetNetGain"),
+
+        metricBreakevenPrice: document.getElementById("metricBreakevenPrice"),
+        badgeBreakeven: document.getElementById("badgeBreakeven"),
+        metricBreakevenSpread: document.getElementById("metricBreakevenSpread"),
+        metricFeePerShare: document.getElementById("metricFeePerShare"),
+
+        orderStringBox: document.getElementById("orderStringBox"),
+        orderStringText: document.getElementById("orderStringText"),
+        btnCopyOrder: document.getElementById("btnCopyOrder"),
+        btnCopyJournal: document.getElementById("btnCopyJournal"),
+        copyIcon: document.getElementById("copyIcon"),
+        copyBtnText: document.getElementById("copyBtnText"),
+
+        summaryTicker: document.getElementById("summaryTicker"),
+        summaryDir: document.getElementById("summaryDir"),
+        summaryEffectiveRR: document.getElementById("summaryEffectiveRR"),
+        summaryFeeDrag: document.getElementById("summaryFeeDrag"),
+
+        ladderTableBody: document.getElementById("ladderTableBody"),
+
+        feeAccordionHeader: document.getElementById("feeAccordionHeader"),
+        feeBreakdownBody: document.getElementById("feeBreakdownBody"),
+        accordionIcon: document.getElementById("accordionIcon"),
+        accordionBadge: document.getElementById("accordionBadge"),
+        feeTableBody: document.getElementById("feeTableBody"),
+
+        breakdownFixedVal: document.getElementById("breakdownFixedVal"),
+        breakdownFixedPct: document.getElementById("breakdownFixedPct"),
+        breakdownStampVal: document.getElementById("breakdownStampVal"),
+        breakdownStampPct: document.getElementById("breakdownStampPct"),
+        breakdownRegVal: document.getElementById("breakdownRegVal"),
+        breakdownRegPct: document.getElementById("breakdownRegPct"),
+
+        toastNotice: document.getElementById("toastNotice"),
+        toastMessage: document.getElementById("toastMessage"),
+        btnResetDefaults: document.getElementById("btnResetDefaults")
+      };
+
+      // -----------------------------------------------------------------------
+      // CORE MATHEMATICAL ENGINE: MOOMOO MY + US REGULATORY SPECIFICATIONS
+      // -----------------------------------------------------------------------
+
+      /**
+       * Calculates exact fee breakdown for a single leg of a trade.
+       * @param {number} shares Number of whole shares
+       * @param {number} price Price per share
+       * @param {'buy'|'sell'} leg Trade leg
+       * @param {number} usdMyr USD to MYR exchange rate
+       * @param {boolean} isPromo 0% promo toggle
+       * @returns {Object} Fee breakdown
+       */
+      function calculateSingleLegFees(shares, price, leg, usdMyr, isPromo) {
+        if (!shares || shares <= 0 || !price || price <= 0) {
+          return {
+            platform: 0,
+            commission: 0,
+            stampDutyUsd: 0,
+            stampDutyMyr: 0,
+            settlement: 0,
+            sec: 0,
+            taf: 0,
+            total: 0,
+            tradeVal: 0
+          };
+        }
+
+        const tradeVal = shares * price;
+
+        // 1. Platform Fee: $0.99 per executed order
+        const platform = 0.99;
+
+        // 2. Commission Rate: 0.03% of transaction value per leg (0% promo toggle)
+        const commission = isPromo ? 0.0 : tradeVal * 0.0003;
+
+        // 3. Malaysian Stamp Duty:
+        // RM 1.00 for every RM 1,000 (or fractional part) of trade value per leg.
+        // Fixed formula: ceil((Trade Value USD * USD/MYR Rate) / 1000) * (1 / USD/MYR Rate)
+        // Capped at RM 1,000 / USD equivalent.
+        const tradeValMyr = tradeVal * usdMyr;
+        const stampDutyMyr = Math.min(1000.0, Math.ceil(tradeValMyr / 1000.0));
+        const stampDutyUsd = stampDutyMyr / usdMyr;
+
+        // 4. US Regulatory Fees:
+        // Settlement Fee: $0.003 per share (Buy & Sell, capped at 1% of trade value)
+        const settlement = Math.min(shares * 0.003, tradeVal * 0.01);
+
+        // SEC Fee (Sell leg only): $0.000008 x Sell Transaction Value (minimum $0.01)
+        let sec = 0.0;
+        if (leg === "sell") {
+          sec = Math.max(0.01, tradeVal * 0.000008);
+        }
+
+        // Trading Activity Fee (TAF, Sell leg only): $0.000166 per share (minimum $0.01)
+        let taf = 0.0;
+        if (leg === "sell") {
+          taf = Math.max(0.01, shares * 0.000166);
+        }
+
+        const total = platform + commission + stampDutyUsd + settlement + sec + taf;
+
+        return {
+          platform,
+          commission,
+          stampDutyUsd,
+          stampDutyMyr,
+          settlement,
+          sec,
+          taf,
+          total,
+          tradeVal
+        };
+      }
+
+      /**
+       * Calculates round-trip fees for entering and exiting a position.
+       * For Long: Entry is Buy, Exit is Sell.
+       * For Short: Entry is Sell, Exit is Buy.
+       * @param {number} shares 
+       * @param {number} entryPrice 
+       * @param {number} exitPrice 
+       * @param {boolean} isShort 
+       * @param {number} usdMyr 
+       * @param {boolean} isPromo 
+       */
+      function calculateRoundTripFees(shares, entryPrice, exitPrice, isShort, usdMyr, isPromo) {
+        if (!shares || shares <= 0) {
+          return {
+            entryLeg: calculateSingleLegFees(0, 0, "buy", usdMyr, isPromo),
+            exitLeg: calculateSingleLegFees(0, 0, "sell", usdMyr, isPromo),
+            total: 0
+          };
+        }
+
+        const entryLegType = isShort ? "sell" : "buy";
+        const exitLegType = isShort ? "buy" : "sell";
+
+        const entryLeg = calculateSingleLegFees(shares, entryPrice, entryLegType, usdMyr, isPromo);
+        const exitLeg = calculateSingleLegFees(shares, exitPrice, exitLegType, usdMyr, isPromo);
+
+        return {
+          entryLeg,
+          exitLeg,
+          total: entryLeg.total + exitLeg.total
+        };
+      }
+
+      /**
+       * Calculates net loss if stopped out.
+       * @param {number} shares 
+       * @param {number} entryPrice 
+       * @param {number} stopPrice 
+       * @param {boolean} isShort 
+       * @param {number} usdMyr 
+       * @param {boolean} isPromo 
+       */
+      function calculateStopLossOutcome(shares, entryPrice, stopPrice, isShort, usdMyr, isPromo) {
+        if (!shares || shares <= 0) {
+          return { grossLoss: 0, fees: 0, netLoss: 0, feeBreakdown: null };
+        }
+
+        const grossLossPerShare = isShort ? (stopPrice - entryPrice) : (entryPrice - stopPrice);
+        const grossLoss = shares * Math.max(0, grossLossPerShare);
+        const feeBreakdown = calculateRoundTripFees(shares, entryPrice, stopPrice, isShort, usdMyr, isPromo);
+        const netLoss = grossLoss + feeBreakdown.total;
+
+        return {
+          grossLoss,
+          fees: feeBreakdown.total,
+          netLoss,
+          feeBreakdown
+        };
+      }
+
+      /**
+       * Sizing engine: Computes optimal whole share size so that:
+       * Net Loss if Stopped = (Shares * |Entry - Stop|) + Total Fees <= Account Risk Budget.
+       * @param {number} balance 
+       * @param {number} riskPct 
+       * @param {number} entryPrice 
+       * @param {number} stopPrice 
+       * @param {boolean} isShort 
+       * @param {number} usdMyr 
+       * @param {boolean} isPromo 
+       */
+      function calculateOptimalPositionSize(balance, riskPct, entryPrice, stopPrice, isShort, usdMyr, isPromo) {
+        const riskBudget = balance * (riskPct / 100.0);
+        const stopDistance = Math.abs(entryPrice - stopPrice);
+
+        if (stopDistance <= 0 || riskBudget <= 0 || entryPrice <= 0 || stopPrice <= 0) {
+          return {
+            recommendedShares: 0,
+            naiveShares: 0,
+            riskBudget,
+            stopDistance,
+            outcomeAtStop: calculateStopLossOutcome(0, entryPrice, stopPrice, isShort, usdMyr, isPromo)
+          };
+        }
+
+        const naiveShares = Math.floor(riskBudget / stopDistance);
+
+        if (naiveShares <= 0) {
+          return {
+            recommendedShares: 0,
+            naiveShares: 0,
+            riskBudget,
+            stopDistance,
+            outcomeAtStop: calculateStopLossOutcome(0, entryPrice, stopPrice, isShort, usdMyr, isPromo)
+          };
+        }
+
+        // Monotonic binary search over integers [1, naiveShares]
+        let low = 1;
+        let high = naiveShares;
+        let bestShares = 0;
+
+        while (low <= high) {
+          const mid = Math.floor((low + high) / 2);
+          const outcome = calculateStopLossOutcome(mid, entryPrice, stopPrice, isShort, usdMyr, isPromo);
+
+          // Epsilon tolerance for floating point comparison
+          if (outcome.netLoss <= riskBudget + 1e-7) {
+            bestShares = mid;
+            low = mid + 1; // Try to size higher
+          } else {
+            high = mid - 1; // Sizing causes net loss to exceed budget
+          }
+        }
+
+        const outcomeAtStop = calculateStopLossOutcome(bestShares, entryPrice, stopPrice, isShort, usdMyr, isPromo);
+
+        return {
+          recommendedShares: bestShares,
+          naiveShares,
+          riskBudget,
+          stopDistance,
+          outcomeAtStop
+        };
+      }
+
+      /**
+       * Solves for target price such that:
+       * Net Gain at Target = (Shares * (Target - Entry)) - Total Fees(win) >= Required Net Profit.
+       * (Or for Short: Shares * (Entry - Target) - Total Fees >= Required Net Profit).
+       * @param {number} shares 
+       * @param {number} entryPrice 
+       * @param {number} reqProfit 
+       * @param {boolean} isShort 
+       * @param {number} usdMyr 
+       * @param {boolean} isPromo 
+       */
+      function findTargetPrice(shares, entryPrice, reqProfit, isShort, usdMyr, isPromo) {
+        if (!shares || shares <= 0 || entryPrice <= 0) {
+          return { targetPrice: 0, netGain: 0, grossGain: 0, fees: 0, feeBreakdown: null };
+        }
+
+        // Bisection root finder
+        let low, high;
+        const perShareEstimate = (reqProfit + 20.0) / shares;
+
+        if (!isShort) {
+          low = entryPrice;
+          high = entryPrice + Math.max(10.0, perShareEstimate * 3.0);
+        } else {
+          low = Math.max(0.01, entryPrice - Math.max(10.0, perShareEstimate * 3.0));
+          high = entryPrice;
+        }
+
+        // Expand high bound if necessary
+        for (let iter = 0; iter < 10; iter++) {
+          const testPrice = isShort ? low : high;
+          const feesObj = calculateRoundTripFees(shares, entryPrice, testPrice, isShort, usdMyr, isPromo);
+          const gross = isShort ? shares * (entryPrice - testPrice) : shares * (testPrice - entryPrice);
+          const net = gross - feesObj.total;
+          if (net >= reqProfit) break;
+          if (!isShort) high += perShareEstimate * 2.0;
+          else low = Math.max(0.001, low / 2.0);
+        }
+
+        // 60 iterations of bisection ensures precision to 10^-12
+        for (let i = 0; i < 60; i++) {
+          const mid = (low + high) / 2.0;
+          const feesObj = calculateRoundTripFees(shares, entryPrice, mid, isShort, usdMyr, isPromo);
+          const gross = isShort ? shares * (entryPrice - mid) : shares * (mid - entryPrice);
+          const net = gross - feesObj.total;
+
+          if (!isShort) {
+            if (net >= reqProfit) high = mid;
+            else low = mid;
+          } else {
+            if (net >= reqProfit) low = mid;
+            else high = mid;
+          }
+        }
+
+        const rawPrice = !isShort ? high : low;
+        
+        // Stock exchanges trade in cents ($0.01 increments) or $0.0001 for sub-dollar.
+        // For Long: round UP to next cent so limit order guarantees Net Gain >= reqProfit.
+        // For Short: round DOWN to next cent so limit order buy-back guarantees Net Gain >= reqProfit.
+        const decimals = entryPrice < 1.0 ? 4 : 2;
+        const scale = Math.pow(10, decimals);
+        let targetRounded = !isShort ? Math.ceil(rawPrice * scale) / scale : Math.floor(rawPrice * scale) / scale;
+
+        // Verify limit order meets or exceeds requirement
+        let finalFees = calculateRoundTripFees(shares, entryPrice, targetRounded, isShort, usdMyr, isPromo);
+        let finalGross = isShort ? shares * (entryPrice - targetRounded) : shares * (targetRounded - entryPrice);
+        let finalNet = finalGross - finalFees.total;
+
+        // If microscopic rounding leaves net short by < 0.001, adjust by 1 tick
+        if (finalNet < reqProfit - 1e-4) {
+          targetRounded = !isShort ? targetRounded + (1 / scale) : targetRounded - (1 / scale);
+          finalFees = calculateRoundTripFees(shares, entryPrice, targetRounded, isShort, usdMyr, isPromo);
+          finalGross = isShort ? shares * (entryPrice - targetRounded) : shares * (targetRounded - entryPrice);
+          finalNet = finalGross - finalFees.total;
+        }
+
+        return {
+          targetPrice: targetRounded,
+          netGain: finalNet,
+          grossGain: finalGross,
+          fees: finalFees.total,
+          feeBreakdown: finalFees
+        };
+      }
+
+      // -----------------------------------------------------------------------
+      // MAIN RECALCULATION & UI RE-RENDER
+      // -----------------------------------------------------------------------
+      function recalculate() {
+        // Parse & sanitize input values
+        state.balance = Math.max(1, parseFloat(el.accountBalance.value) || 1000);
+        state.riskPct = Math.max(0.01, parseFloat(el.riskPercentage.value) || 1.0);
+        state.rrRatio = Math.max(0.1, parseFloat(el.rrRatio.value) || 2.0);
+        state.usdMyr = Math.max(1.0, parseFloat(el.usdMyrRate.value) || 4.40);
+        state.ticker = (el.tradeTicker.value || "NVDA").trim().toUpperCase();
+        state.entry = Math.max(0.001, parseFloat(el.entryPrice.value) || 150.00);
+        state.stop = Math.max(0.001, parseFloat(el.stopPrice.value) || 147.00);
+        state.customShares = Math.max(1, parseInt(el.customSharesInput.value, 10) || 1);
+
+        // Update secondary input controls
+        el.riskSlider.value = state.riskPct;
+        el.rrSlider.value = state.rrRatio;
+
+        const riskBudget = state.balance * (state.riskPct / 100.0);
+        const reqProfit = riskBudget * state.rrRatio;
+
+        el.riskBudgetDisplay.textContent = `Risk: $${riskBudget.toFixed(2)}`;
+        el.riskBudgetSublabel.textContent = `Max allowed net risk: $${riskBudget.toFixed(2)}`;
+        el.rrProfitSublabel.textContent = `Req. Net Profit: $${reqProfit.toFixed(2)}`;
+        el.feeBoxCommissionVal.textContent = state.isPromo ? "0.00% (Promo Active)" : "0.03% ($0.0003/leg)";
+
+        // Direction validations
+        const isInvalidDirection = state.isShort
+          ? state.stop <= state.entry
+          : state.stop >= state.entry;
+
+        const stopDist = Math.abs(state.entry - state.stop);
+        const stopDistPct = state.entry > 0 ? (stopDist / state.entry) * 100 : 0;
+        const dirSign = state.isShort ? "+" : "-";
+
+        el.stopDistanceVal.textContent = `$${stopDist.toFixed(2)} (${dirSign}${stopDistPct.toFixed(2)}%)`;
+        el.stopDistanceDot.style.background = state.isShort ? "#38BDF8" : "#FB7185";
+
+        // Perform position sizing
+        const sizing = calculateOptimalPositionSize(
+          state.balance,
+          state.riskPct,
+          state.entry,
+          state.stop,
+          state.isShort,
+          state.usdMyr,
+          state.isPromo
+        );
+
+        // Determine effective shares based on sizing mode
+        let effectiveShares = state.isManualSizing ? state.customShares : sizing.recommendedShares;
+
+        // Calculate trade outcomes at Stop
+        const stopOutcome = calculateStopLossOutcome(
+          effectiveShares,
+          state.entry,
+          state.stop,
+          state.isShort,
+          state.usdMyr,
+          state.isPromo
+        );
+
+        // Calculate Target Price for required profit
+        const targetOutcome = findTargetPrice(
+          effectiveShares,
+          state.entry,
+          reqProfit,
+          state.isShort,
+          state.usdMyr,
+          state.isPromo
+        );
+
+        // Calculate Breakeven Price (reqProfit = 0.0)
+        const beOutcome = findTargetPrice(
+          effectiveShares,
+          state.entry,
+          0.0,
+          state.isShort,
+          state.usdMyr,
+          state.isPromo
+        );
+
+        // Calculate Capital Required
+        const capitalRequired = effectiveShares * state.entry;
+        const cashUtilizationPct = state.balance > 0 ? (capitalRequired / state.balance) * 100 : 0;
+
+        // Friction calculations
+        const frictionAtStopPct = riskBudget > 0 ? (stopOutcome.fees / riskBudget) * 100 : 0;
+        const feeDragPerShare = effectiveShares > 0 ? (stopOutcome.fees / effectiveShares) : 0;
+
+        // Render Banners (Reality-Checks)
+        renderRealityCheckBanners({
+          isInvalidDirection,
+          sizing,
+          effectiveShares,
+          stopOutcome,
+          riskBudget,
+          frictionAtStopPct,
+          capitalRequired,
+          balance: state.balance,
+          entry: state.entry,
+          isShort: state.isShort
+        });
+
+        // Update Key Metrics Cards
+        updateMetricCards({
+          effectiveShares,
+          sizing,
+          capitalRequired,
+          cashUtilizationPct,
+          riskBudget,
+          stopOutcome,
+          targetOutcome,
+          beOutcome,
+          frictionAtStopPct,
+          feeDragPerShare,
+          reqProfit,
+          isInvalidDirection
+        });
+
+        // Update Execution Order String
+        updateOrderString({
+          effectiveShares,
+          entry: state.entry,
+          stop: state.stop,
+          target: targetOutcome.targetPrice,
+          netLoss: stopOutcome.netLoss,
+          ticker: state.ticker,
+          isShort: state.isShort,
+          isInvalidDirection,
+          realizedRR: stopOutcome.netLoss > 0 ? (targetOutcome.netGain / stopOutcome.netLoss) : state.rrRatio,
+          frictionAtStopPct
+        });
+
+        // Update Risk-to-Reward Projection Ladder
+        renderProjectionLadder({
+          effectiveShares,
+          entry: state.entry,
+          stop: state.stop,
+          isShort: state.isShort,
+          usdMyr: state.usdMyr,
+          isPromo: state.isPromo,
+          targetOutcome,
+          beOutcome,
+          stopOutcome,
+          riskBudget,
+          rrRatio: state.rrRatio,
+          isInvalidDirection
+        });
+
+        // Update Itemized Fee Breakdown Table
+        renderFeeBreakdownTable({
+          effectiveShares,
+          entry: state.entry,
+          stop: state.stop,
+          targetPrice: targetOutcome.targetPrice,
+          isShort: state.isShort,
+          usdMyr: state.usdMyr,
+          isPromo: state.isPromo
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // RENDER WARNING BANNERS
+      // -----------------------------------------------------------------------
+      function renderRealityCheckBanners(data) {
+        const banners = [];
+
+        // 1. Invalid setup direction alert
+        if (data.isInvalidDirection) {
+          const msg = data.isShort
+            ? `In a <b>SHORT</b> setup, Stop-Loss ($${state.stop.toFixed(2)}) must be <b>HIGHER</b> than Entry ($${state.entry.toFixed(2)}).`
+            : `In a <b>LONG</b> setup, Stop-Loss ($${state.stop.toFixed(2)}) must be <b>LOWER</b> than Entry ($${state.entry.toFixed(2)}).`;
+          banners.push(`
+            <div class="alert-banner error">
+              <div class="alert-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <div class="alert-content">
+                <div class="alert-title">Invalid Trade Stop-Loss Level</div>
+                <div class="alert-desc">${msg}</div>
+              </div>
+            </div>
+          `);
+          el.bannersContainer.innerHTML = banners.join("");
+          return;
+        }
+
+        // 2. Zero Sizing Friction Block Alert
+        if (data.effectiveShares <= 0) {
+          banners.push(`
+            <div class="alert-banner error">
+              <div class="alert-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <div class="alert-content">
+                <div class="alert-title">Position Sizing Blocked (0 Shares)</div>
+                <div class="alert-desc">Your Account Risk Budget of <b>$${data.riskBudget.toFixed(2)}</b> is smaller than the minimum round-trip brokerage friction (~$2.55+) plus stop distance for even 1 share. Increase your risk budget or widen your stop loss.</div>
+              </div>
+            </div>
+          `);
+        }
+
+        // 3. Friction Alert (> 15% of risk budget)
+        if (data.effectiveShares > 0 && data.frictionAtStopPct > 15.0) {
+          banners.push(`
+            <div class="alert-banner friction">
+              <div class="alert-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <div class="alert-content">
+                <div class="alert-title">Friction Alert: High Fee Drag (${data.frictionAtStopPct.toFixed(1)}% of Risk Budget)</div>
+                <div class="alert-desc">
+                  Estimated round-trip fees (<b>$${data.stopOutcome.fees.toFixed(2)}</b>) consume <b>${data.frictionAtStopPct.toFixed(1)}%</b> of your total risk budget ($${data.riskBudget.toFixed(2)}).
+                  Fixed platform fees ($1.98 RT) heavily penalize tight stop-losses on small share sizes. Consider widening stop distance, increasing position size, or trading higher value tickers.
+                </div>
+              </div>
+            </div>
+          `);
+        }
+
+        // 4. Capital Alert (Capital required > Account balance)
+        if (data.effectiveShares > 0 && data.capitalRequired > data.balance) {
+          const excess = data.capitalRequired - data.balance;
+          const maxCashShares = Math.floor(data.balance / data.entry);
+          banners.push(`
+            <div class="alert-banner capital">
+              <div class="alert-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              </div>
+              <div class="alert-content">
+                <div class="alert-title">Capital Alert: Position Exceeds Available Cash Balance</div>
+                <div class="alert-desc">
+                  Required capital of <b>$${data.capitalRequired.toFixed(2)}</b> exceeds your account balance ($${data.balance.toFixed(2)}) by <b>$${excess.toFixed(2)}</b> (${((data.capitalRequired / data.balance) * 100).toFixed(0)}% cash utilization).
+                  This trade requires a Margin Account or lower share size. Max affordable cash size is <b>${maxCashShares} shares</b>.
+                </div>
+                ${maxCashShares > 0 ? `<button type="button" class="alert-action-btn" id="btnClampCash" data-clamp="${maxCashShares}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect></svg>
+                  Clamp to Cash Balance (${maxCashShares} shares)
+                </button>` : ""}
+              </div>
+            </div>
+          `);
+        }
+
+        el.bannersContainer.innerHTML = banners.join("");
+
+        // Attach event listener for clamp button if present
+        const clampBtn = document.getElementById("btnClampCash");
+        if (clampBtn) {
+          clampBtn.addEventListener("click", function () {
+            const sh = parseInt(clampBtn.getAttribute("data-clamp"), 10);
+            if (sh > 0) {
+              setCustomShareOverride(sh);
+            }
+          });
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // UPDATE KEY METRICS CARDS
+      // -----------------------------------------------------------------------
+      function updateMetricCards(data) {
+        if (data.isInvalidDirection || data.effectiveShares <= 0) {
+          el.metricShares.innerHTML = `0 <span style="font-size: 16px; font-weight: 500; color: var(--text-muted);">shares</span>`;
+          el.badgeShareStatus.textContent = "Inactive";
+          el.badgeShareStatus.className = "metric-badge alert";
+          el.metricCapital.textContent = "$0.00";
+          el.metricCashPct.textContent = "0.0%";
+          el.naiveComparisonSub.textContent = data.isInvalidDirection ? "Invalid stop-loss level" : "Risk budget smaller than fees";
+
+          el.metricMaxRisk.textContent = `$${data.riskBudget.toFixed(2)}`;
+          el.badgeRiskPct.textContent = `Budget: ${state.riskPct.toFixed(2)}%`;
+          el.metricActualLoss.textContent = "$0.00";
+          el.metricActualLossPct.textContent = "0.00%";
+          el.metricGrossLoss.textContent = "$0.00";
+          el.metricLossFees.textContent = "$0.00";
+
+          el.metricRtFees.textContent = "$0.00";
+          el.badgeFriction.textContent = "0.0% Drag";
+          el.badgeFriction.className = "metric-badge neutral";
+          el.metricFeesAtStop.textContent = "$0.00";
+          el.metricFeesAtTarget.textContent = "$0.00";
+
+          el.metricTargetPrice.textContent = "—";
+          el.badgeTargetRR.textContent = `1 : ${state.rrRatio.toFixed(1)} RR`;
+          el.metricTargetMove.textContent = "—";
+          el.metricReqProfit.textContent = `$${data.reqProfit.toFixed(2)}`;
+          el.metricTargetNetGain.textContent = "$0.00";
+
+          el.metricBreakevenPrice.textContent = "—";
+          el.metricBreakevenSpread.textContent = "—";
+          el.metricFeePerShare.textContent = "$0.00";
+          return;
+        }
+
+        // 1. Share Size Card
+        el.metricShares.innerHTML = `${data.effectiveShares} <span style="font-size: 16px; font-weight: 500; color: var(--text-muted);">shares</span>`;
+        if (state.isManualSizing) {
+          el.badgeShareStatus.textContent = "Custom Manual";
+          el.badgeShareStatus.className = "metric-badge warn";
+          el.naiveComparisonSub.textContent = `Optimal calculated risk size: ${data.sizing.recommendedShares} shs`;
+        } else {
+          el.badgeShareStatus.textContent = "Optimal Sizing";
+          el.badgeShareStatus.className = "metric-badge safe";
+          if (data.sizing.naiveShares > data.sizing.recommendedShares) {
+            const naiveLoss = (data.sizing.naiveShares * data.sizing.stopDistance) + 3.10;
+            el.naiveComparisonSub.textContent = `Naive size: ${data.sizing.naiveShares} shs (would over-risk to ~$${naiveLoss.toFixed(2)})`;
+          } else {
+            el.naiveComparisonSub.textContent = `Matches theoretical bound (${data.sizing.naiveShares} shs)`;
+          }
+        }
+        el.metricCapital.textContent = `$${data.capitalRequired.toFixed(2)}`;
+        el.metricCashPct.textContent = `${data.cashUtilizationPct.toFixed(1)}%`;
+
+        // 2. Max Net Risk Card
+        el.metricMaxRisk.textContent = `$${data.riskBudget.toFixed(2)}`;
+        el.badgeRiskPct.textContent = `Budget: ${state.riskPct.toFixed(2)}%`;
+        el.metricActualLoss.textContent = `$${data.stopOutcome.netLoss.toFixed(2)}`;
+        const actualLossPct = state.balance > 0 ? (data.stopOutcome.netLoss / state.balance) * 100 : 0;
+        el.metricActualLossPct.textContent = `${actualLossPct.toFixed(2)}%`;
+        el.metricGrossLoss.textContent = `$${data.stopOutcome.grossLoss.toFixed(2)}`;
+        el.metricLossFees.textContent = `$${data.stopOutcome.fees.toFixed(2)}`;
+
+        // 3. Estimated Fees Card
+        el.metricRtFees.textContent = `$${data.stopOutcome.fees.toFixed(2)}`;
+        el.metricFeesAtStop.textContent = `$${data.stopOutcome.fees.toFixed(2)}`;
+        el.metricFeesAtTarget.textContent = `$${data.targetOutcome.fees.toFixed(2)}`;
+
+        el.badgeFriction.textContent = `${data.frictionAtStopPct.toFixed(1)}% Drag`;
+        if (data.frictionAtStopPct <= 7.0) {
+          el.badgeFriction.className = "metric-badge safe";
+        } else if (data.frictionAtStopPct <= 15.0) {
+          el.badgeFriction.className = "metric-badge warn";
+        } else {
+          el.badgeFriction.className = "metric-badge alert";
+        }
+
+        // 4. Target Price Card
+        el.metricTargetPrice.textContent = `$${data.targetOutcome.targetPrice.toFixed(2)}`;
+        el.badgeTargetRR.textContent = `1 : ${state.rrRatio.toFixed(1)} RR`;
+
+        const targetDist = Math.abs(data.targetOutcome.targetPrice - state.entry);
+        const targetPct = (targetDist / state.entry) * 100;
+        const targetSign = state.isShort ? "-" : "+";
+        el.metricTargetMove.textContent = `${targetSign}$${targetDist.toFixed(2)} (${targetSign}${targetPct.toFixed(2)}%)`;
+        el.metricReqProfit.textContent = `$${data.reqProfit.toFixed(2)}`;
+        el.metricTargetNetGain.textContent = `$${data.targetOutcome.netGain.toFixed(2)}`;
+
+        // 5. Breakeven Card
+        el.metricBreakevenPrice.textContent = `$${data.beOutcome.targetPrice.toFixed(2)}`;
+        const beSpread = Math.abs(data.beOutcome.targetPrice - state.entry);
+        const beSpreadPct = (beSpread / state.entry) * 100;
+        const beSign = state.isShort ? "-" : "+";
+        el.metricBreakevenSpread.textContent = `${beSign}$${beSpread.toFixed(2)} (${beSign}${beSpreadPct.toFixed(2)}%)`;
+        el.metricFeePerShare.textContent = `$${data.feeDragPerShare.toFixed(2)}`;
+      }
+
+      // -----------------------------------------------------------------------
+      // UPDATE ORDER STRING & STRIP
+      // -----------------------------------------------------------------------
+      function updateOrderString(data) {
+        if (data.isInvalidDirection || data.effectiveShares <= 0) {
+          el.orderStringText.textContent = "INCOMPLETE SETUP — ADJUST PARAMETERS TO GENERATE ORDER";
+          el.summaryTicker.textContent = data.ticker;
+          el.summaryDir.textContent = data.isShort ? "SHORT" : "BUY";
+          el.summaryEffectiveRR.textContent = "—";
+          el.summaryFeeDrag.textContent = "—";
+          return;
+        }
+
+        const actionWord = data.isShort ? "SHORT" : "BUY";
+        const entryStr = `$${data.entry.toFixed(2)}`;
+        const stopStr = `$${data.stop.toFixed(2)}`;
+        const targetStr = `$${data.target.toFixed(2)}`;
+        const maxLossStr = `$${data.netLoss.toFixed(2)}`;
+
+        // Prompt specification format:
+        // BUY [X] shares @ $[Entry] | STOP: $[Stop] | TARGET: $[Target] | MAX LOSS: $[Net Loss]
+        const orderStr = `${actionWord} ${data.effectiveShares} shares @ ${entryStr} | STOP: ${stopStr} | TARGET: ${targetStr} | MAX LOSS: ${maxLossStr}`;
+
+        el.orderStringText.textContent = orderStr;
+        el.summaryTicker.textContent = data.ticker;
+        el.summaryDir.textContent = actionWord;
+        el.summaryDir.style.color = data.isShort ? "var(--color-loss)" : "var(--color-profit)";
+        el.summaryEffectiveRR.textContent = `${data.realizedRR.toFixed(2)} R`;
+        el.summaryFeeDrag.textContent = `${data.frictionAtStopPct.toFixed(1)}%`;
+      }
+
+      // -----------------------------------------------------------------------
+      // RENDER RISK-TO-REWARD PROJECTION LADDER
+      // -----------------------------------------------------------------------
+      function renderProjectionLadder(data) {
+        if (data.isInvalidDirection || data.effectiveShares <= 0) {
+          el.ladderTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No trade ladder available for current parameters</td></tr>`;
+          return;
+        }
+
+        const rows = [];
+        const mults = [-1.0, 0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0];
+
+        mults.forEach(function (m) {
+          let levelLabel, exitPrice, priceMove, grossPL, fees, netPL, accReturn, rowClass = "";
+
+          if (m === -1.0) {
+            levelLabel = "Stop-Loss (-1.0R)";
+            exitPrice = data.stop;
+            priceMove = data.isShort ? `+$${(data.stop - data.entry).toFixed(2)}` : `-$${(data.entry - data.stop).toFixed(2)}`;
+            grossPL = -data.stopOutcome.grossLoss;
+            fees = data.stopOutcome.fees;
+            netPL = -data.stopOutcome.netLoss;
+            rowClass = "stop-row";
+          } else if (m === 0.0) {
+            levelLabel = "Breakeven (0.0R)";
+            exitPrice = data.beOutcome.targetPrice;
+            const diff = data.beOutcome.targetPrice - data.entry;
+            priceMove = (diff >= 0 ? "+" : "") + `$${diff.toFixed(2)}`;
+            grossPL = data.beOutcome.grossGain;
+            fees = data.beOutcome.fees;
+            netPL = data.beOutcome.netGain;
+            rowClass = "breakeven-row";
+          } else {
+            const reqProf = data.riskBudget * m;
+            const outcome = findTargetPrice(
+              data.effectiveShares,
+              data.entry,
+              reqProf,
+              data.isShort,
+              data.usdMyr,
+              data.isPromo
+            );
+            exitPrice = outcome.targetPrice;
+            const diff = exitPrice - data.entry;
+            priceMove = (diff >= 0 ? "+" : "") + `$${diff.toFixed(2)}`;
+            grossPL = outcome.grossGain;
+            fees = outcome.fees;
+            netPL = outcome.netGain;
+
+            levelLabel = `Target +${m.toFixed(1)}R`;
+            if (Math.abs(m - data.rrRatio) < 0.05) {
+              rowClass = "active-target";
+              levelLabel += ` ★ (Active)`;
+            }
+          }
+
+          accReturn = state.balance > 0 ? (netPL / state.balance) * 100 : 0;
+          const netColor = netPL >= 0 ? "#34D399" : "#FB7185";
+          const returnColor = accReturn >= 0 ? "#34D399" : "#FB7185";
+          const returnSign = accReturn >= 0 ? "+" : "";
+          const netSign = netPL >= 0 ? "+" : "";
+
+          rows.push(`
+            <tr class="${rowClass}">
+              <td><b>${levelLabel}</b></td>
+              <td>$${exitPrice.toFixed(2)}</td>
+              <td>${priceMove}</td>
+              <td>${grossPL >= 0 ? "+" : ""}$${grossPL.toFixed(2)}</td>
+              <td>$${fees.toFixed(2)}</td>
+              <td style="color:${netColor}; font-weight:700;">${netSign}$${netPL.toFixed(2)}</td>
+              <td style="color:${returnColor}; font-weight:700;">${returnSign}${accReturn.toFixed(2)}%</td>
+            </tr>
+          `);
+        });
+
+        el.ladderTableBody.innerHTML = rows.join("");
+      }
+
+      // -----------------------------------------------------------------------
+      // RENDER ITEMIZED FEE BREAKDOWN TABLE
+      // -----------------------------------------------------------------------
+      function renderFeeBreakdownTable(data) {
+        if (!data.effectiveShares || data.effectiveShares <= 0) {
+          el.feeTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:16px;">Configure trade parameters to display fee schedule</td></tr>`;
+          return;
+        }
+
+        const buyLeg = calculateSingleLegFees(data.effectiveShares, data.entry, "buy", data.usdMyr, data.isPromo);
+        const sellStopLeg = calculateSingleLegFees(data.effectiveShares, data.stop, "sell", data.usdMyr, data.isPromo);
+        const sellTargetLeg = calculateSingleLegFees(data.effectiveShares, data.targetPrice, "sell", data.usdMyr, data.isPromo);
+
+        const rtPlatform = buyLeg.platform + sellStopLeg.platform;
+        const rtComm = buyLeg.commission + sellStopLeg.commission;
+        const rtStamp = buyLeg.stampDutyUsd + sellStopLeg.stampDutyUsd;
+        const rtSettle = buyLeg.settlement + sellStopLeg.settlement;
+        const rtSec = sellStopLeg.sec;
+        const rtTaf = sellStopLeg.taf;
+        const rtTotal = buyLeg.total + sellStopLeg.total;
+
+        const rows = [
+          {
+            name: "Platform Fee",
+            rate: "$0.99 / executed order",
+            buy: buyLeg.platform,
+            sellStop: sellStopLeg.platform,
+            sellTarget: sellTargetLeg.platform,
+            rt: rtPlatform
+          },
+          {
+            name: "Brokerage Commission",
+            rate: data.isPromo ? "0% Promo Tier" : "0.03% Trade Value",
+            buy: buyLeg.commission,
+            sellStop: sellStopLeg.commission,
+            sellTarget: sellTargetLeg.commission,
+            rt: rtComm
+          },
+          {
+            name: "Malaysian Stamp Duty",
+            rate: `RM 1/RM 1k leg @ ${data.usdMyr} FX`,
+            buy: buyLeg.stampDutyUsd,
+            sellStop: sellStopLeg.stampDutyUsd,
+            sellTarget: sellTargetLeg.stampDutyUsd,
+            rt: rtStamp
+          },
+          {
+            name: "US Settlement Fee",
+            rate: "$0.003/sh (Buy & Sell, cap 1%)",
+            buy: buyLeg.settlement,
+            sellStop: sellStopLeg.settlement,
+            sellTarget: sellTargetLeg.settlement,
+            rt: rtSettle
+          },
+          {
+            name: "US SEC Regulatory Fee",
+            rate: "0.0008% value (min $0.01, sell only)",
+            buy: 0.0,
+            sellStop: sellStopLeg.sec,
+            sellTarget: sellTargetLeg.sec,
+            rt: rtSec
+          },
+          {
+            name: "US FINRA TAF Fee",
+            rate: "$0.000166/sh (min $0.01, sell only)",
+            buy: 0.0,
+            sellStop: sellStopLeg.taf,
+            sellTarget: sellTargetLeg.taf,
+            rt: rtTaf
+          }
+        ];
+
+        let html = "";
+        rows.forEach(function (r) {
+          html += `
+            <tr>
+              <td><b>${r.name}</b></td>
+              <td style="color:var(--text-muted); font-size:11px;">${r.rate}</td>
+              <td>$${r.buy.toFixed(4)}</td>
+              <td>$${r.sellStop.toFixed(4)}</td>
+              <td>$${r.sellTarget.toFixed(4)}</td>
+              <td style="color:#38BDF8; font-weight:600;">$${r.rt.toFixed(4)}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+          <tr class="total-row">
+            <td>TOTAL ESTIMATED FEES</td>
+            <td>—</td>
+            <td>$${buyLeg.total.toFixed(4)}</td>
+            <td>$${sellStopLeg.total.toFixed(4)}</td>
+            <td>$${sellTargetLeg.total.toFixed(4)}</td>
+            <td style="color:#34D399; font-size:13px;">$${rtTotal.toFixed(2)}</td>
+          </tr>
+        `;
+
+        el.feeTableBody.innerHTML = html;
+
+        // Update friction breakdown cards
+        const fixedPct = rtTotal > 0 ? (rtPlatform / rtTotal) * 100 : 0;
+        const stampPct = rtTotal > 0 ? (rtStamp / rtTotal) * 100 : 0;
+        const regPct = rtTotal > 0 ? ((rtSettle + rtSec + rtTaf) / rtTotal) * 100 : 0;
+
+        el.breakdownFixedVal.textContent = `$${rtPlatform.toFixed(2)}`;
+        el.breakdownFixedPct.textContent = `${fixedPct.toFixed(1)}% of total friction ($0.99 x 2 legs)`;
+
+        el.breakdownStampVal.textContent = `$${rtStamp.toFixed(2)}`;
+        el.breakdownStampPct.textContent = `RM ${(buyLeg.stampDutyMyr + sellStopLeg.stampDutyMyr).toFixed(2)} converted @ ${data.usdMyr}`;
+
+        el.breakdownRegVal.textContent = `$${(rtSettle + rtSec + rtTaf).toFixed(2)}`;
+        el.breakdownRegPct.textContent = `${regPct.toFixed(1)}% (Settlement + SEC + TAF)`;
+      }
+
+      // -----------------------------------------------------------------------
+      // CLIPBOARD UTILITY WITH FALLBACK
+      // -----------------------------------------------------------------------
+      function copyTextToClipboard(text, successMessage) {
+        if (!text) return;
+
+        function showSuccess() {
+          showToast(successMessage || "Copied to clipboard!");
+          el.btnCopyOrder.classList.add("copied");
+          el.copyBtnText.textContent = "Copied!";
+          setTimeout(function () {
+            el.btnCopyOrder.classList.remove("copied");
+            el.copyBtnText.textContent = "Copy Order Parameters";
+          }, 2000);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(showSuccess).catch(function () {
+            fallbackCopy(text, showSuccess);
+          });
+        } else {
+          fallbackCopy(text, showSuccess);
+        }
+      }
+
+      function fallbackCopy(text, callback) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          const successful = document.execCommand("copy");
+          if (successful && callback) callback();
+        } catch (err) {
+          console.error("Fallback copy failed", err);
+        }
+        textArea.remove();
+      }
+
+      function showToast(msg) {
+        el.toastMessage.textContent = msg;
+        el.toastNotice.classList.add("show");
+        setTimeout(function () {
+          el.toastNotice.classList.remove("show");
+        }, 2500);
+      }
+
+      // -----------------------------------------------------------------------
+      // HELPER: MANUAL OVERRIDE SETTER
+      // -----------------------------------------------------------------------
+      function setCustomShareOverride(shares) {
+        state.isManualSizing = true;
+        state.customShares = shares;
+        el.customSharesInput.value = shares;
+        el.btnModeAuto.classList.remove("active");
+        el.btnModeManual.classList.add("active");
+        el.manualSharesGroup.style.display = "block";
+        recalculate();
+      }
+
+      // -----------------------------------------------------------------------
+      // EVENT LISTENERS & BINDINGS
+      // -----------------------------------------------------------------------
+
+      // Live numeric inputs
+      const liveInputs = [
+        el.accountBalance,
+        el.riskPercentage,
+        el.rrRatio,
+        el.usdMyrRate,
+        el.tradeTicker,
+        el.entryPrice,
+        el.stopPrice,
+        el.customSharesInput
+      ];
+
+      liveInputs.forEach(function (input) {
+        input.addEventListener("input", recalculate);
+        input.addEventListener("change", recalculate);
+      });
+
+      // Range sliders sync
+      el.riskSlider.addEventListener("input", function () {
+        el.riskPercentage.value = parseFloat(el.riskSlider.value).toFixed(1);
+        recalculate();
+      });
+
+      el.rrSlider.addEventListener("input", function () {
+        el.rrRatio.value = parseFloat(el.rrSlider.value).toFixed(1);
+        recalculate();
+      });
+
+      // Quick Chips click handler
+      document.addEventListener("click", function (e) {
+        const chip = e.target.closest("[data-set]");
+        if (!chip) return;
+
+        const [key, val] = chip.getAttribute("data-set").split(":");
+        if (key === "balance") {
+          el.accountBalance.value = val;
+        } else if (key === "risk") {
+          el.riskPercentage.value = val;
+          el.riskSlider.value = val;
+        } else if (key === "rr") {
+          el.rrRatio.value = val;
+          el.rrSlider.value = val;
+        } else if (key === "myr") {
+          el.usdMyrRate.value = val;
+        }
+
+        // Highlight active chip within parent
+        const parent = chip.parentElement;
+        if (parent) {
+          parent.querySelectorAll("[data-set]").forEach(function (c) {
+            c.classList.remove("active");
+          });
+          chip.classList.add("active");
+        }
+
+        recalculate();
+      });
+
+      // Stock Presets click handler
+      document.querySelectorAll("[data-preset]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const [ticker, entry, stop] = btn.getAttribute("data-preset").split(",");
+          el.tradeTicker.value = ticker;
+          el.entryPrice.value = entry;
+          el.stopPrice.value = stop;
+
+          // Auto-detect direction
+          const numEntry = parseFloat(entry);
+          const numStop = parseFloat(stop);
+          if (numStop > numEntry && !state.isShort) {
+            setDirection(true);
+          } else if (numStop < numEntry && state.isShort) {
+            setDirection(false);
+          }
+
+          recalculate();
+        });
+      });
+
+      // Commission Promo vs Standard Toggles
+      el.btnCommissionPromo.addEventListener("click", function () {
+        state.isPromo = true;
+        el.btnCommissionPromo.classList.add("active", "promo");
+        el.btnCommissionStd.classList.remove("active");
+        el.promoStatusHint.textContent = "Promo Active: $0.00";
+        recalculate();
+      });
+
+      el.btnCommissionStd.addEventListener("click", function () {
+        state.isPromo = false;
+        el.btnCommissionStd.classList.add("active");
+        el.btnCommissionPromo.classList.remove("active", "promo");
+        el.promoStatusHint.textContent = "Standard 0.03% Active";
+        recalculate();
+      });
+
+      // Direction Toggles
+      function setDirection(isShort) {
+        state.isShort = isShort;
+        if (isShort) {
+          el.btnDirShort.classList.add("active", "short");
+          el.btnDirLong.classList.remove("active", "long");
+        } else {
+          el.btnDirLong.classList.add("active", "long");
+          el.btnDirShort.classList.remove("active", "short");
+        }
+        recalculate();
+      }
+
+      el.btnDirLong.addEventListener("click", function () { setDirection(false); });
+      el.btnDirShort.addEventListener("click", function () { setDirection(true); });
+
+      // Mode Toggles (Auto vs Manual)
+      el.btnModeAuto.addEventListener("click", function () {
+        state.isManualSizing = false;
+        el.btnModeAuto.classList.add("active");
+        el.btnModeManual.classList.remove("active");
+        el.manualSharesGroup.style.display = "none";
+        recalculate();
+      });
+
+      el.btnModeManual.addEventListener("click", function () {
+        state.isManualSizing = true;
+        el.btnModeManual.classList.add("active");
+        el.btnModeAuto.classList.remove("active");
+        el.manualSharesGroup.style.display = "block";
+        recalculate();
+      });
+
+      // Accordion toggle
+      el.feeAccordionHeader.addEventListener("click", function () {
+        const isOpen = el.feeBreakdownBody.classList.toggle("open");
+        el.accordionIcon.classList.toggle("expanded", isOpen);
+        el.accordionBadge.textContent = isOpen ? "Click to collapse" : "Click to expand";
+      });
+
+      el.btnQuickExpandFees.addEventListener("click", function () {
+        el.feeBreakdownBody.classList.add("open");
+        el.accordionIcon.classList.add("expanded");
+        el.accordionBadge.textContent = "Click to collapse";
+        el.feeBreakdownCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      // Copy Order String Button
+      el.btnCopyOrder.addEventListener("click", function () {
+        const text = el.orderStringText.textContent;
+        if (text && !text.includes("INCOMPLETE SETUP")) {
+          copyTextToClipboard(text, "Order Parameters copied to clipboard!");
+        } else {
+          showToast("Please provide valid order parameters first.");
+        }
+      });
+
+      // Copy Journal Record Button
+      el.btnCopyJournal.addEventListener("click", function () {
+        const dir = state.isShort ? "SHORT" : "BUY";
+        const journalStr = [
+          `--- TRADE RECORD [${state.ticker}] ---`,
+          `Action: ${dir} ${el.metricShares.textContent}`,
+          `Entry: $${state.entry.toFixed(2)}`,
+          `Stop-Loss: $${state.stop.toFixed(2)}`,
+          `Target: ${el.metricTargetPrice.textContent}`,
+          `Breakeven: ${el.metricBreakevenPrice.textContent}`,
+          `Max Net Risk: ${el.metricActualLoss.textContent} (${el.metricActualLossPct.textContent})`,
+          `Req. Profit: ${el.metricReqProfit.textContent}`,
+          `Est. Fees: ${el.metricRtFees.textContent} (${el.badgeFriction.textContent})`,
+          `Capital: ${el.metricCapital.textContent} (${el.metricCashPct.textContent} equity)`,
+          `Date: ${new Date().toISOString().split("T")[0]}`
+        ].join("\n");
+
+        copyTextToClipboard(journalStr, "Full trade journal log copied!");
+      });
+
+      // Reset Defaults
+      el.btnResetDefaults.addEventListener("click", function () {
+        el.accountBalance.value = "1000";
+        el.riskPercentage.value = "1.0";
+        el.riskSlider.value = "1.0";
+        el.rrRatio.value = "2.0";
+        el.rrSlider.value = "2.0";
+        el.usdMyrRate.value = "4.40";
+        el.tradeTicker.value = "NVDA";
+        el.entryPrice.value = "150.00";
+        el.stopPrice.value = "147.00";
+        state.isPromo = true;
+        el.btnCommissionPromo.classList.add("active", "promo");
+        el.btnCommissionStd.classList.remove("active");
+        el.promoStatusHint.textContent = "Promo Active: $0.00";
+
+        setDirection(false);
+        state.isManualSizing = false;
+        el.btnModeAuto.classList.add("active");
+        el.btnModeManual.classList.remove("active");
+        el.manualSharesGroup.style.display = "none";
+
+        recalculate();
+        showToast("Defaults restored!");
+      });
+
+      // Keyboard shortcut: Ctrl+C or Alt+C while not focusing input copies order string
+      window.addEventListener("keydown", function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === "c" && document.activeElement.tagName !== "INPUT") {
+          const text = el.orderStringText.textContent;
+          if (text && !text.includes("INCOMPLETE SETUP")) {
+            copyTextToClipboard(text, "Order string copied via shortcut!");
+          }
+        }
+      });
+
+      // Initial execution on page load
+      recalculate();
+
+    })();
+  </script>
+</body>
+</html>
